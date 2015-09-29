@@ -3,6 +3,6 @@
 
 int main(UNUSED int argc, UNUSED char **argv)
 {
-    printf("Hello, RocketPropelledChainsaws!\n");
+    DEBUG("Hello, RocketPropelledChainsaws!\n");
     return 0;
 }
