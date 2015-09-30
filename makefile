@@ -3,7 +3,7 @@ SOURCES = src
 BUILD   = build
 DEVEXT  = -dev
 
-CC     = g++
+CXX     = g++
 FLAGS  = -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11
 CFLAGS = 
 LIBS   = 
@@ -38,11 +38,11 @@ $(DIRS):
 	$(MKDIR) $@
 
 $(BNRY): $(OBJS)
-	$(CC) $(FLAGS) $(LIBS) $(OBJS) -o $@
+	$(CXX) $(FLAGS) $(LIBS) $(OBJS) -o $@
 
 $(OBJS): | $(DIRS)
 
 $(BUILD)/$(MODE)/%.o: %.cpp
-	$(CC) $(FLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
+	$(CXX) $(FLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
 
 -include $(DEPS)
