@@ -3,8 +3,7 @@ SOURCES = src
 BUILD   = build
 DEVEXT  = -dev
 
-CXX     = g++
-FLAGS  = -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11
+FLAGS  := -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11
 CFLAGS = 
 LIBS   = 
 MKDIR  = mkdir -p
