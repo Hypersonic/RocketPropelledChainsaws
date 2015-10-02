@@ -1,7 +1,6 @@
-PROGRAM = rktchain
 SOURCES = src
 BUILD   = build
-DEVEXT  = -dev
+#DEVEXT  = -dev
 
 FLAGS  := -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11
 CFLAGS = 
@@ -20,18 +19,18 @@ DEPS = $(OBJS:%.o=%.d)
 DIRS = $(sort $(dir $(BANK_OBJS)))
 DIRS += $(sort $(dir $(ATM_OBJS)))
 
-ifdef DEBUG
-	BNRY  := $(BNRY)$(DEVEXT)
-	FLAGS += -g -DDEBUG_MODE
-	MODE   = debug
-endif
+#ifdef DEBUG
+#	BNRY  := $(BNRY)$(DEVEXT)
+#	FLAGS += -g -DDEBUG_MODE
+#	MODE   = debug
+#endif
 
 .PHONY: all clean
 
 all: $(BANK_BNRY) $(ATM_BNRY)
 
 clean:
-	$(RM) $(BUILD) $(PROGRAM) $(PROGRAM)$(DEVEXT)
+	$(RM) $(BUILD) $(BANK_BNRY) $(ATM_BNRY)
 
 $(DIRS):
 	$(MKDIR) $@
