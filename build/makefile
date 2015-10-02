@@ -1,6 +1,6 @@
 SOURCES = src
 BUILD   = build
-#DEVEXT  = -dev
+DEVEXT  = -dev
 
 FLAGS  := -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11
 BANK_FLAGS := -DBANK
@@ -21,18 +21,20 @@ DEPS = $(OBJS:%.o=%.d)
 DIRS = $(sort $(dir $(BANK_OBJS)))
 DIRS += $(sort $(dir $(ATM_OBJS)))
 
-#ifdef DEBUG
-#	BNRY  := $(BNRY)$(DEVEXT)
-#	FLAGS += -g -DDEBUG_MODE
-#	MODE   = debug
-#endif
+ifdef DEBUG
+	ATM_BNRY  := $(ATM_BNRY)$(DEVEXT)
+	BANK_BNRY  := $(BANK_BNRY)$(DEVEXT)
+	FLAGS += -g -DDEBUG_MODE
+	MODE   = debug
+endif
 
 .PHONY: all clean
 
 all: $(BANK_BNRY) $(ATM_BNRY)
 
 clean:
-	$(RM) $(BUILD) $(BANK_BNRY) $(ATM_BNRY)
+	$(RM) $(BUILD) $(BANK_BNRY) $(ATM_BNRY) $(BANK_BNRY)$(DEVEXT) $(ATM_BNRY)$(DEVEXT)
+
 
 $(DIRS):
 	$(MKDIR) $@
