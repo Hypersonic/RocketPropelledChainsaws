@@ -26,5 +26,5 @@
 *.exe
 *.out
 *.app
-build/
-rktchain
+build/build/
+build/rktchain
