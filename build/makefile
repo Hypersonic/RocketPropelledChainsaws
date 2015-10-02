@@ -10,12 +10,15 @@ MKDIR  = mkdir -p
 RM     = rm -rf
 
 MODE = release
-BNRY = $(PROGRAM)
+BANK_BNRY = bank
+ATM_BNRY = atm
 SDRS = $(shell find $(SOURCES) -type d | xargs echo)
 SRCS = $(filter-out %.inc.cpp,$(foreach d,$(SDRS),$(wildcard $(addprefix $(d)/*,.cpp))))
-OBJS = $(patsubst %.cpp,%.o,$(addprefix $(BUILD)/$(MODE)/,$(SRCS)))
+BANK_OBJS = $(patsubst %.cpp,%.o,$(addprefix $(BUILD)/bank/$(MODE)/,$(SRCS)))
+ATM_OBJS = $(patsubst %.cpp,%.o,$(addprefix $(BUILD)/atm/$(MODE)/,$(SRCS)))
 DEPS = $(OBJS:%.o=%.d)
-DIRS = $(sort $(dir $(OBJS)))
+DIRS = $(sort $(dir $(BANK_OBJS)))
+DIRS += $(sort $(dir $(ATM_OBJS)))
 
 ifdef DEBUG
 	BNRY  := $(BNRY)$(DEVEXT)
@@ -23,25 +26,30 @@ ifdef DEBUG
 	MODE   = debug
 endif
 
-.PHONY: all clean run
+.PHONY: all clean
 
-all: $(BNRY)
+all: $(BANK_BNRY) $(ATM_BNRY)
 
 clean:
 	$(RM) $(BUILD) $(PROGRAM) $(PROGRAM)$(DEVEXT)
 
-run: $(BNRY)
-	./$(BNRY)
-
 $(DIRS):
 	$(MKDIR) $@
 
-$(BNRY): $(OBJS)
-	$(CXX) $(FLAGS) $(LIBS) $(OBJS) -o $@
+$(BANK_BNRY): $(BANK_OBJS)
+	$(CXX) $(FLAGS) -DBANK $(LIBS) $(BANK_OBJS) -o $@
 
-$(OBJS): | $(DIRS)
+$(ATM_BNRY): $(ATM_OBJS)
+	$(CXX) $(FLAGS) -DATM $(LIBS) $(ATM_OBJS) -o $@
 
-$(BUILD)/$(MODE)/%.o: %.cpp
-	$(CXX) $(FLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
+$(BANK_OBJS): | $(DIRS)
+
+$(ATM_OBJS): | $(DIRS)
+
+$(BUILD)/atm/$(MODE)/%.o: %.cpp
+	$(CXX) $(FLAGS) -DATM $(CFLAGS) -MMD -MP -c $< -o $@
+
+$(BUILD)/bank/$(MODE)/%.o: %.cpp
+	$(CXX) $(FLAGS) -DBANK $(CFLAGS) -MMD -MP -c $< -o $@
 
 -include $(DEPS)
