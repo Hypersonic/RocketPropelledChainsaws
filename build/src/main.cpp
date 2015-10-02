@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include "shared/macros.h"
+#include "atm/atm.h"
+#include "bank/bank.h"
 
-int main(UNUSED int argc, UNUSED char **argv)
+int main(int argc, char **argv)
 {
 #if defined BANK
-    LOG("Hello, Bank!\n");
+    bank_main(argc, argv);
 #elif defined ATM
-    LOG("Hello, ATM!\n");
+    atm_main(argc, argv);
 #else
     LOG("What binary am I even in?\n");
 #endif

@@ -28,5 +28,7 @@
 *.app
 build/build/
 build/rktchain
-atm
-bank
+build/atm
+build/atm-dev
+build/bank
+build/bank-dev
