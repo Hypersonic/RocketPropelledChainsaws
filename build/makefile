@@ -3,8 +3,10 @@ BUILD   = build
 #DEVEXT  = -dev
 
 FLAGS  := -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11
+BANK_FLAGS := -DBANK
+ATM_FLAGS := -DATM
 CFLAGS = 
-LIBS   = 
+LIBS   = -lpthread
 MKDIR  = mkdir -p
 RM     = rm -rf
 
@@ -46,9 +48,9 @@ $(BANK_OBJS): | $(DIRS)
 $(ATM_OBJS): | $(DIRS)
 
 $(BUILD)/atm/$(MODE)/%.o: %.cpp
-	$(CXX) $(FLAGS) -DATM $(CFLAGS) -MMD -MP -c $< -o $@
+	$(CXX) $(FLAGS) $(ATM_FLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
 
 $(BUILD)/bank/$(MODE)/%.o: %.cpp
-	$(CXX) $(FLAGS) -DBANK $(CFLAGS) -MMD -MP -c $< -o $@
+	$(CXX) $(FLAGS) $(BANK_FLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
 
 -include $(DEPS)
