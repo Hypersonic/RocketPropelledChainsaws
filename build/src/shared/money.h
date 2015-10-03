@@ -8,7 +8,7 @@ struct money {
     uint8_t  cents;
 };
 
-int add_money(money * a, money b);
-int subtract_money(money * a, money b);
+bool add_money(money * a, money b);
+bool subtract_money(money * a, money b);
 
 #endif
