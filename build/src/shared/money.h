@@ -8,7 +8,14 @@ struct money {
     uint8_t  cents;
 };
 
+/* Adds money struct b to money pointer a
+ * Returns whether the operation was a success
+ */
 bool add_money(money * a, money b);
+
+/* Subtracts money struct b from money pointer a
+ * Returns whether the operation was a success
+ */
 bool subtract_money(money * a, money b);
 
 #endif

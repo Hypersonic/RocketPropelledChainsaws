@@ -36,7 +36,6 @@ bool add_money(money * a, money b) {
     }
 }
 
-// Subtracts b from a
 bool subtract_money(money * a, money b) {
     uint32_t result;
     
