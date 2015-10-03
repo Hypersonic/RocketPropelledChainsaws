@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include "money.h"
 
-bool add_money(struct money *a, struct money b) {
+bool add_money(struct money *a, struct money b)
+{
     uint32_t result;
     
     assert(a->cents < 100);
@@ -36,7 +37,8 @@ bool add_money(struct money *a, struct money b) {
     }
 }
 
-bool subtract_money(struct money *a, struct money b) {
+bool subtract_money(struct money *a, struct money b)
+{
     uint32_t result;
     
     assert(a->cents < 100);
