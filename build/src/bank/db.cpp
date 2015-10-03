@@ -9,7 +9,7 @@ db_t *db_create()
         return NULL;
     }
 
-    if (0 == pthread_mutex_init(&db->lock, NULL)) {
+    if (0 != pthread_mutex_init(&db->lock, NULL)) {
         ERR("Could not initialize mutex on DB\n");
         free(db);
         return NULL;
