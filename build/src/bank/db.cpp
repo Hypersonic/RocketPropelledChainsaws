@@ -46,3 +46,23 @@ bool db_insert(db_t *db, std::string key, struct money value)
 
     return true;
 }
+
+bool db_update(db_t *db, std::string key, struct money value)
+{
+    assert(db != NULL);
+
+    if (0 != pthread_mutex_lock(&db->lock)) {
+        LOG("Could not lock db\n");
+        return false;
+    }
+
+    DEBUG("Updating DB, key %s: $%u.%d -> $%u.%d\n", key.c_str(), db->balances[key].dollars, db->balances[key].cents, value.dollars, value.cents);
+    db->balances[key] = value; /* change the element */
+
+    if (0 != pthread_mutex_unlock(&db->lock)) {
+        LOG("Could not unlock db\n");
+        return false;
+    }
+
+    return true;
+}

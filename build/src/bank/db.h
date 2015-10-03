@@ -17,8 +17,17 @@ typedef struct db_s {
 db_t *db_create();
 
 /* Insert a balance into the DB (must be a first-time addition.
- * For changing an existing balance, see db_modify).
- * returns whether the operation was a success */
+ * For changing an existing balance, see db_update).
+ *
+ * Returns whether the operation was a success
+ * */
 bool db_insert(db_t *db, std::string key, struct money value);
+
+/* Update an existing key in the database to a new value.
+ * For inserting an element into the database, see db_insert
+ *
+ * Returns whether the operation was a success
+ */
+bool db_update(db_t *db, std::string key, struct money value);
 
 #endif
