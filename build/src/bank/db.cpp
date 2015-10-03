@@ -36,7 +36,7 @@ bool db_insert(db_t *db, std::string key, struct money value)
         return false;
     }
 
-    DEBUG("Inserting into DB: $%u.%d\n", value.dollars, value.cents);
+    DEBUG("Inserting into DB, key \"%s\": $%u.%d\n", key.c_str(), value.dollars, value.cents);
     db->balances[key] = value; /* insert the element */
 
     if (0 != pthread_mutex_unlock(&db->lock)) {
@@ -56,7 +56,7 @@ bool db_update(db_t *db, std::string key, struct money value)
         return false;
     }
 
-    DEBUG("Updating DB, key %s: $%u.%d -> $%u.%d\n", key.c_str(), db->balances[key].dollars, db->balances[key].cents, value.dollars, value.cents);
+    DEBUG("Updating DB, key \"%s\": $%u.%d -> $%u.%d\n", key.c_str(), db->balances[key].dollars, db->balances[key].cents, value.dollars, value.cents);
     db->balances[key] = value; /* change the element */
 
     if (0 != pthread_mutex_unlock(&db->lock)) {
