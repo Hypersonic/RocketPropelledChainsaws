@@ -56,6 +56,12 @@ bool db_update(db_t *db, std::string key, struct money value)
         return false;
     }
 
+    /* if the db does not contain the key, we return an error */
+    if (db->balances.end() == db->balances.find(key)) {
+        LOG("DB did not contain key \"%s\", cannot update\n", key.c_str());
+        return false;
+    }
+
     DEBUG("Updating DB, key \"%s\": $%u.%d -> $%u.%d\n", key.c_str(), db->balances[key].dollars, db->balances[key].cents, value.dollars, value.cents);
     db->balances[key] = value; /* change the element */
 
