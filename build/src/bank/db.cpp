@@ -19,3 +19,30 @@ db_t *db_create()
 
     return db;
 }
+
+bool db_insert(db_t *db, std::string key, struct money value)
+{
+    assert(db != NULL);
+
+
+    if (0 != pthread_mutex_lock(&db->lock)) {
+        LOG("Could not lock db\n");
+        return false;
+    }
+
+    /* if the db contains the key, we return an error */
+    if (db->balances.end() != db->balances.find(key)) {
+        LOG("DB contained key \"%s\" already, cannot insert\n", key.c_str());
+        return false;
+    }
+
+    DEBUG("Inserting into DB: $%u.%d\n", value.dollars, value.cents);
+    db->balances[key] = value; /* insert the element */
+
+    if (0 != pthread_mutex_unlock(&db->lock)) {
+        LOG("Could not unlock db\n");
+        return false;
+    }
+
+    return true;
+}
