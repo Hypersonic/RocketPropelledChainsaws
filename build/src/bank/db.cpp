@@ -72,3 +72,10 @@ bool db_update(db_t *db, std::string key, struct money value)
 
     return true;
 }
+
+struct money db_get(db_t *db, std::string key)
+{
+    assert(db != NULL);
+
+    return db->balances[key];
+}

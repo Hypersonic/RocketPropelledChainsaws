@@ -30,4 +30,13 @@ bool db_insert(db_t *db, std::string key, struct money value);
  */
 bool db_update(db_t *db, std::string key, struct money value);
 
+/* Retrieve a balance associated with a key from the db.
+ *
+ * If the db does not contain that key, behavior is undefined,
+ * so you should call db_contains() first to check.
+ *
+ * Returns the `struct money` associated with the key.
+ */
+struct money db_get(db_t *db, std::string key);
+
 #endif
