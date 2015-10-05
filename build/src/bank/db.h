@@ -16,6 +16,12 @@ typedef struct db_s {
  * Returns NULL if there was an error */
 db_t *db_create();
 
+/* Destroy a DB.
+ *
+ * Returns whether the operation was a success.
+ */
+bool db_destroy(db_t *db);
+
 /* Insert a balance into the DB (must be a first-time addition.
  * For changing an existing balance, see db_update).
  *

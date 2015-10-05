@@ -1,4 +1,5 @@
 #include "db.h"
+#include <new>
 
 db_t *db_create()
 {
@@ -15,9 +16,21 @@ db_t *db_create()
         return NULL;
     }
 
-    db->balances = std::map<std::string, struct money>();
+    new (&db->balances) std::map<std::string, struct money>();
 
     return db;
+}
+
+bool db_destroy(db_t *db)
+{
+    if (0 != pthread_mutex_destroy(&db->lock)) {
+        ERR("Could not destroy DB mutex\n");
+        return false;
+    }
+
+    delete &db->balances;
+
+    return true;
 }
 
 bool db_insert(db_t *db, std::string key, struct money value)
