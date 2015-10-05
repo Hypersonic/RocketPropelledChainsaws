@@ -15,6 +15,8 @@
 
 #include "shared/macros.h"
 
-int client_connect();
+int atm_connect(char *host_name, int host_port);
+int atm_send(int hsock, char *buffer, unsigned buffer_len);
+void atm_close(int hsock);
 
 #endif

@@ -54,6 +54,7 @@ int bank_create_server()
             pthread_detach(thread_id);
         } else {
             ERR("[-] Error accepting %d\n", errno);
+            puts("protocol_error");
         }
     }
 }
@@ -69,12 +70,14 @@ void *bank_socket_handler(void *lp)
     memset(buffer, 0, buffer_len);
     if((bytecount = recv(*csock, buffer, buffer_len, 0))== -1){
         ERR("Error receiving data %d\n", errno);
+        puts("protocol_error");
     }
     DEBUG("Received bytes %d\nReceived string \"%s\"\n", bytecount, buffer);
     strcat(buffer, " SERVER ECHO");
 
     if((bytecount = send(*csock, buffer, strlen(buffer), 0))== -1){
         ERR("Error sending data %d\n", errno);
+        puts("protocol_error");
     }
 
     DEBUG("Sent bytes %d\n", bytecount);

@@ -12,6 +12,5 @@ int main(int argc, char **argv)
 #else
     LOG("What binary am I even in?\n");
 #endif
-    DEBUG("If you can see this, DEBUG_MODE is set properly! If not, export DEBUG in your environment and build again!\n");
     return 0;
 }
