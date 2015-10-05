@@ -13,11 +13,7 @@
 #include <openssl/hmac.h>
 
 #include "shared/macros.h"
-
-struct transfer {
-    char cmd;
-    char *data;
-};
+#include "shared/transfer.h"
 
 int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt,
     EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx);
