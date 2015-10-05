@@ -9,8 +9,7 @@ int bank_create_server()
     socklen_t addr_size = 0;
     pthread_t thread_id = 0;
 
-    hsock = socket(AF_INET, SOCK_STREAM, 0);
-    if (hsock == -1){
+    if ((hsock = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         ERR("[-] Error initializing socket %d\n", errno);
         return 255;
     }
@@ -55,6 +54,7 @@ int bank_create_server()
         } else {
             ERR("[-] Error accepting %d\n", errno);
             puts("protocol_error");
+            fflush(stdout);
         }
     }
 }
@@ -68,16 +68,19 @@ void *bank_socket_handler(void *lp)
     int bytecount;
 
     memset(buffer, 0, buffer_len);
-    if((bytecount = recv(*csock, buffer, buffer_len, 0))== -1){
+    if((bytecount = recv(*csock, buffer, buffer_len, 0)) == -1){
         ERR("Error receiving data %d\n", errno);
         puts("protocol_error");
+        fflush(stdout);
     }
+
     DEBUG("Received bytes %d\nReceived string \"%s\"\n", bytecount, buffer);
     strcat(buffer, " SERVER ECHO");
 
-    if((bytecount = send(*csock, buffer, strlen(buffer), 0))== -1){
+    if((bytecount = send(*csock, buffer, strlen(buffer), 0)) == -1){
         ERR("Error sending data %d\n", errno);
         puts("protocol_error");
+        fflush(stdout);
     }
 
     DEBUG("Sent bytes %d\n", bytecount);

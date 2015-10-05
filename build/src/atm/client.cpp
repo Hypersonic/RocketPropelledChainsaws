@@ -5,8 +5,7 @@ int atm_connect(char *host_name, int host_port)
     int hsock, *p_int, err;
     struct sockaddr_in my_addr;
 
-    hsock = socket(AF_INET, SOCK_STREAM, 0);
-    if (hsock == -1){
+    if ((hsock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         ERR("Error initializing socket %d\n", errno);
         return 63;
     }
@@ -15,7 +14,7 @@ int atm_connect(char *host_name, int host_port)
     *p_int = 1;
 
     if ( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 ) ||
-        (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
+        (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ) {
         ERR("Error setting options %d\n", errno);
         free(p_int);
         return 63;

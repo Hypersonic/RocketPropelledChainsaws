@@ -31,6 +31,11 @@ int atm_main(int argc, char **argv)
             host_port = (int) strtol(optarg, &end, 10);
             if (*end) {
                 ERR("[-] Unable to parse host port: %s", end);
+                return 255;
+            }
+            if (host_port < 1024 || host_port > 65535) {
+                ERR("[-] Port specified is not in valid range: %d", host_port);
+                return 255;
             }
             break;
         case 'c':
@@ -81,7 +86,7 @@ int atm_main(int argc, char **argv)
     }
 
     // Testing message
-    const char *test = "LOL HI SERVER :3";
+    const char *test = "LOL HI SERVER :3\x00";
     buffer = (char *) malloc(strlen(test));
     strcpy(buffer, test);
     buffer_len = strlen(buffer);

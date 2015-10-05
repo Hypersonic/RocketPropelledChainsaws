@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/uio.h>
 #include <unistd.h>
 #include <openssl/aes.h>
@@ -12,6 +13,11 @@
 #include <openssl/hmac.h>
 
 #include "shared/macros.h"
+
+struct transfer {
+    char cmd;
+    char *data;
+};
 
 int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt,
     EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx);
