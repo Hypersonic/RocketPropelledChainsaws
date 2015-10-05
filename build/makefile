@@ -5,8 +5,8 @@ DEVEXT  = -dev
 FLAGS  := -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11 -Isrc/
 BANK_FLAGS := -DBANK
 ATM_FLAGS := -DATM
-CFLAGS = 
-LIBS   = -lpthread
+CFLAGS =
+LIBS   = -lpthread -lssl -lcrypto
 MKDIR  = mkdir -p
 RM     = rm -rf
 

@@ -2,9 +2,16 @@
 
 int bank_main(UNUSED int argc, UNUSED char **argv)
 {
+
     LOG("Hello, Bank!\n");
+
+    bank_create_server();
+    return 0;
+}
+
+/* Test duplicate inserts */
+UNUSED int test_db() {
     db_t *db = db_create();
-    /* Test duplicate inserts */
     if (!db_insert(db, "asdf", {100, 1})) {
         return 255;
     }
@@ -14,5 +21,6 @@ int bank_main(UNUSED int argc, UNUSED char **argv)
     if (!db_insert(db, "asdf", {100, 3})) {
         return 255;
     }
+
     return 0;
 }
