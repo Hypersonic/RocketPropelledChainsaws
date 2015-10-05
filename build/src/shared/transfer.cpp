@@ -1,6 +1,6 @@
 #include "transfer.h"
 
-bool serialize(struct transfer *src, char *dst)
+bool serialize(char *dst, struct transfer *src)
 {
     src->amt.dollars = htonl(src->amt.dollars);
     memcpy(dst, src, sizeof(struct transfer));
@@ -8,7 +8,7 @@ bool serialize(struct transfer *src, char *dst)
     return true;
 }
 
-bool deserialize(char *src, struct transfer *dst)
+bool deserialize(struct transfer *dst, char *src)
 {
     memcpy(dst, src, sizeof(struct transfer));
     dst->amt.dollars = ntohl(dst->amt.dollars);

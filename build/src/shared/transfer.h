@@ -16,11 +16,11 @@ struct transfer {
  * over the network, changing byteorder as needed.
  * Returns whether the serialization was a success
  */
-bool serialize(struct transfer *src, char *dst);
+bool serialize(char *dst, struct transfer *src);
 
 /* Deserializes a char pointer into a transfer struct.
  * Returns whether the deserialization was a success
  */
-bool deserialize(char *src, struct transfer *dst);
+bool deserialize(struct transfer *dst, char *src);
 
 #endif
