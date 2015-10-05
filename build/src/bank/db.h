@@ -9,7 +9,7 @@
 
 typedef struct db_s {
     pthread_mutex_t lock;
-    std::map<std::string, struct money> balances;
+    std::map<std::string, struct money> *balances;
 } db_t;
 
 /* Create a new DB.
@@ -35,6 +35,10 @@ bool db_insert(db_t *db, std::string key, struct money value);
  * Returns whether the operation was a success
  */
 bool db_update(db_t *db, std::string key, struct money value);
+
+/* Return whether a db contains a given key
+ */
+bool db_contains(db_t *db, std::string key);
 
 /* Retrieve a balance associated with a key from the db.
  *

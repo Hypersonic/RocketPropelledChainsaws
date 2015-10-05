@@ -1,5 +1,4 @@
 #include "db.h"
-#include <new>
 
 db_t *db_create()
 {
@@ -16,7 +15,7 @@ db_t *db_create()
         return NULL;
     }
 
-    new (&db->balances) std::map<std::string, struct money>();
+    db->balances = new std::map<std::string, struct money>();
 
     return db;
 }
@@ -28,7 +27,7 @@ bool db_destroy(db_t *db)
         return false;
     }
 
-    delete &db->balances;
+    delete db->balances;
 
     return true;
 }
@@ -44,13 +43,13 @@ bool db_insert(db_t *db, std::string key, struct money value)
     }
 
     /* if the db contains the key, we return an error */
-    if (db->balances.end() != db->balances.find(key)) {
+    if (db->balances->end() != db->balances->find(key)) {
         LOG("DB contained key \"%s\" already, cannot insert\n", key.c_str());
         return false;
     }
 
     DEBUG("Inserting into DB, key \"%s\": $%u.%d\n", key.c_str(), value.dollars, value.cents);
-    db->balances[key] = value; /* insert the element */
+    (*db->balances)[key] = value; /* insert the element */
 
     if (0 != pthread_mutex_unlock(&db->lock)) {
         LOG("Could not unlock db\n");
@@ -70,13 +69,13 @@ bool db_update(db_t *db, std::string key, struct money value)
     }
 
     /* if the db does not contain the key, we return an error */
-    if (db->balances.end() == db->balances.find(key)) {
+    if (db->balances->end() == db->balances->find(key)) {
         LOG("DB did not contain key \"%s\", cannot update\n", key.c_str());
         return false;
     }
 
-    DEBUG("Updating DB, key \"%s\": $%u.%d -> $%u.%d\n", key.c_str(), db->balances[key].dollars, db->balances[key].cents, value.dollars, value.cents);
-    db->balances[key] = value; /* change the element */
+    DEBUG("Updating DB, key \"%s\": $%u.%d -> $%u.%d\n", key.c_str(), (*db->balances)[key].dollars, (*db->balances)[key].cents, value.dollars, value.cents);
+    (*db->balances)[key] = value; /* change the element */
 
     if (0 != pthread_mutex_unlock(&db->lock)) {
         LOG("Could not unlock db\n");
@@ -86,9 +85,16 @@ bool db_update(db_t *db, std::string key, struct money value)
     return true;
 }
 
+bool db_contains(db_t *db, std::string key)
+{
+    assert(db != NULL);
+
+    return db->balances->end() != db->balances->find(key);
+}
+
 struct money db_get(db_t *db, std::string key)
 {
     assert(db != NULL);
 
-    return db->balances[key];
+    return (*db->balances)[key];
 }
