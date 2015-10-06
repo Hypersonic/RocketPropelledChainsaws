@@ -2,6 +2,9 @@
 #define MONEY_H
 #include <assert.h>
 #include <stdint.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <shared/macros.h>
 
 struct money {
     uint32_t dollars;
@@ -17,5 +20,7 @@ bool add_money(struct money *a, struct money b);
  * Returns whether the operation was a success
  */
 bool subtract_money(struct money *a, struct money b);
+
+struct money *parse_money(char *str);
 
 #endif

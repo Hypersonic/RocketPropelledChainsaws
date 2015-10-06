@@ -2,13 +2,16 @@
 
 int atm_main(int argc, char **argv)
 {
-    int hsock, host_port, get_current_balance, c;
+    int hsock, host_port, c;
     unsigned buffer_len;
+    char cmd;
     char *buffer = NULL, *auth_file = NULL, *host_name = NULL,
             *card_file = NULL, *account = NULL, *end = NULL;
+    struct money *amount;
 
-    get_current_balance = 0;
+    cmd = '\0';
     host_port = 0;
+    amount = NULL;
 
     LOG("Hello, ATM!\n");
 
@@ -45,16 +48,21 @@ int atm_main(int argc, char **argv)
             account = optarg;
             break;
         case 'n':
-            // TODO
-            break;
         case 'd':
-            // TODO
-            break;
         case 'w':
-            // TODO
+            cmd = optopt;
+            if (amount == NULL) {
+                amount = parse_money(optarg);
+                if (amount == NULL) {
+                    return 255;
+                }
+            } else {
+                ERR("[-] Additional optional command specified");
+                return 255;
+            }
             break;
         case 'g':
-            get_current_balance = 1;
+            cmd = optopt;
             break;
         case '?':
             if (optopt == 'c') {
@@ -97,5 +105,7 @@ int atm_main(int argc, char **argv)
 
     atm_close(hsock);
 
+    free(buffer);
+    free(amount);
     return 0;
 }
