@@ -48,13 +48,14 @@ int bank_create_server()
         DEBUG("[*] Waiting for a connection\n");
         csock = (int *) malloc(sizeof(int));
         if ((*csock = accept(hsock, (sockaddr *)&sadr, &addr_size)) != -1) {
-            DEBUG("---------------------\nReceived connection from %s\n",inet_ntoa(sadr.sin_addr));
+            DEBUG("---------------------\nReceived connection from %s\n", inet_ntoa(sadr.sin_addr));
             pthread_create(&thread_id, 0, &bank_socket_handler, (void *)csock);
             pthread_detach(thread_id);
         } else {
             ERR("[-] Error accepting %d\n", errno);
             puts("protocol_error");
             fflush(stdout);
+            return 255;
         }
     }
 }
@@ -73,6 +74,8 @@ void *bank_socket_handler(void *lp)
         ERR("Error receiving data %d\n", errno);
         puts("protocol_error");
         fflush(stdout);
+        server_close(csock);
+        return NULL;
     }
 
     if (NULL == (trans = (struct transfer *) malloc(sizeof(struct transfer)))) {
@@ -80,7 +83,7 @@ void *bank_socket_handler(void *lp)
         puts("protocol_error");
         fflush(stdout);
         /* TODO: send a response back to the client */
-        free(csock);
+        server_close(csock);
         return NULL;
     }
 
@@ -89,7 +92,7 @@ void *bank_socket_handler(void *lp)
         puts("protocol_error");
         fflush(stdout);
         /* TODO: send a response back to the client */
-        free(csock);
+        server_close(csock);
         return NULL;
     }
 
@@ -107,7 +110,7 @@ void *bank_socket_handler(void *lp)
         puts("protocol_error");
         fflush(stdout);
         /* TODO: send a response back to the client */
-        free(csock);
+        server_close(csock);
         return NULL;
     }
 
@@ -115,10 +118,18 @@ void *bank_socket_handler(void *lp)
         ERR("Error sending data %d\n", errno);
         puts("protocol_error");
         fflush(stdout);
+        server_close(csock);
+        return NULL;
     }
 
     DEBUG("Sent bytes %d\n", bytecount);
 
+    server_close(csock);
+    return 0;
+}
+
+void server_close(int *csock)
+{
+    close(*csock);
     free(csock);
-    return NULL;
 }

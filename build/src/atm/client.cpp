@@ -45,21 +45,25 @@ int atm_send(int hsock, char *buffer, unsigned buffer_len)
     atm_transfer = (struct transfer *) malloc(sizeof(struct transfer));
     if (atm_transfer == NULL) {
         ERR("[-] Unable to allocate");
+        atm_close(hsock);
         return 255;
     }
 
     if ((bytecount = send(hsock, buffer, strlen(buffer), 0)) == -1) {
         ERR("Error sending data %d\n", errno);
+        atm_close(hsock);
         return 63;
     }
     LOG("Sent bytes %d\n", bytecount);
 
     if ((bytecount = recv(hsock, buffer, buffer_len, 0)) == -1) {
         ERR("Error receiving data %d\n", errno);
+        atm_close(hsock);
         return 63;
     }
     LOG("Recieved bytes %d\n", bytecount);
 
+    atm_close(hsock);
     return 0;
 }
 
