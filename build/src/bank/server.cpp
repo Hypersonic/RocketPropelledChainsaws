@@ -76,7 +76,6 @@ void *bank_socket_handler(void *lp)
 
     DEBUG("Received bytes %d\nReceived string \"%s\"\n", bytecount, buffer);
     strcat(buffer, " SERVER ECHO");
-    DEBUG("asdf\n");
 
     if((bytecount = send(*csock, buffer, strlen(buffer), 0)) == -1){
         ERR("Error sending data %d\n", errno);
