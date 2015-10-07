@@ -98,6 +98,16 @@ void *bank_socket_handler(void *lp)
 
     switch (trans->type) {
     case 'n': /* new account */
+        if (!db_contains(db, trans->name)) {
+            ERR("User already exists: \"%s\"\n", trans->name);
+            /* TODO: send a response back to the client */
+            server_close(csock);
+            return NULL;
+        }
+        db_insert(db, trans->name, trans->amt);
+        /* TODO: print transfer */
+        trans->type = 0; /* return code 0 */
+        serialize(buffer, trans);
         break;
     case 'd': /* deposit */
         break;
