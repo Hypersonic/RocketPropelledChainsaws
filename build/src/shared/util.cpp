@@ -1,5 +1,16 @@
 #include "util.h"
 
+void print_escaped_string(char *str)
+{
+    unsigned i, len;
+
+    len = strlen(str);
+    for (i = 0; i < len; i++) {
+        if (str[i] == '"') putc('\\', stdout);
+        putc(str[i], stdout);
+    }
+}
+
 int random_bytes(char* buf, size_t len)
 {
     int random_data = open("/dev/random", O_RDONLY);

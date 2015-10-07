@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <string>
 #include "shared/money.h"
+#include "shared/util.h"
 
 struct transfer {
     uint8_t type;

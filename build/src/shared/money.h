@@ -23,5 +23,6 @@ bool add_money(struct money *a, struct money b);
 bool subtract_money(struct money *a, struct money b);
 
 int parse_money(struct money *dst, char *str);
+void print_money(struct money *amt);
 
 #endif

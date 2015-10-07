@@ -24,6 +24,7 @@ void hmac_init(HMAC_CTX *ctx, const char* key, size_t len);
 void hmac_update(HMAC_CTX *ctx, const char* bytes, size_t len);
 void hmac_digest(HMAC_CTX *ctx, char* digest);
 
+void print_escaped_string(char *str);
 int random_bytes(char* buf, size_t len);
 
 unsigned get_file_size(const char * file_name);

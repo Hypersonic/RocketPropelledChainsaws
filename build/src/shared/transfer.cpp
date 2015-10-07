@@ -44,3 +44,39 @@ int deserialize(struct transfer *dst, char *src)
     memcpy(dst->card_file, src + cur_size, sizeof(dst->card_file));
     return 0;
 }
+
+int print_transfer(char type, struct transfer *t)
+{
+    const char *type_message[4] = {"initial_balance", "deposit",
+                             "withdraw", "balance"};
+    const char *msg;
+
+    msg = NULL;
+    switch (type) {
+    case 'n':
+        msg = type_message[0];
+        break;
+    case 'd':
+        msg = type_message[1];
+        break;
+    case 'w':
+        msg = type_message[2];
+        break;
+    case 'g':
+        msg = type_message[3];
+        break;
+    default:
+        ERR("[-] Invalid type given: %c", type);
+        return 255;
+    }
+
+    printf("{\"account\":\"");
+    print_escaped_string(t->name);
+    printf("\",\"%s\":", msg);
+    print_money(&(t->amt));
+    printf("}\n");
+
+    fflush(stdout);
+    return 0;
+}
+
