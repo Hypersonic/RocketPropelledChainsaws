@@ -66,7 +66,8 @@ int bank_main(int argc, char **argv)
         return 255;
     }
 
-    if(access(auth_file, F_OK) != -1) {
+    // TODO switch this if (access(auth_file, F_OK) != -1) {
+    if (access(auth_file, F_OK) == -1) {
         ERR("[-] Auth file already exists!\n");
         return 255;
     } else {
@@ -77,14 +78,14 @@ int bank_main(int argc, char **argv)
         }
 
         random_bytes(auth_file_contents, SECURE_SIZE);
-        if (write_to_file(auth_file_contents, SECURE_SIZE, auth_file) == 255) {
+        if (!write_to_file(auth_file_contents, SECURE_SIZE, auth_file)) {
             return 255;
         }
         puts("created");
         fflush(stdout);
     }
 
-    if (bank_create_server() == 255) {
+    if (!bank_create_server()) {
         return 255;
     }
     return 0;

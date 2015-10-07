@@ -24,4 +24,6 @@ int serialize(char *dst, struct transfer *src);
  */
 int deserialize(struct transfer *dst, char *src);
 
+int print_transfer(char type, struct transfer *t);
+
 #endif

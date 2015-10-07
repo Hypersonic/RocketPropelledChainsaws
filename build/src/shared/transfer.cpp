@@ -20,7 +20,7 @@ int serialize(char *dst, struct transfer *src)
     cur_size += sizeof(src->amt.cents);
 
     memcpy(dst + cur_size, src->card_file, sizeof(src->card_file));
-    return 0;
+    return 1;
 }
 
 int deserialize(struct transfer *dst, char *src)
@@ -42,7 +42,7 @@ int deserialize(struct transfer *dst, char *src)
     cur_size += sizeof(dst->amt.cents);
 
     memcpy(dst->card_file, src + cur_size, sizeof(dst->card_file));
-    return 0;
+    return 1;
 }
 
 int print_transfer(char type, struct transfer *t)
@@ -67,7 +67,7 @@ int print_transfer(char type, struct transfer *t)
         break;
     default:
         ERR("[-] Invalid type given: %c", type);
-        return 255;
+        return 0;
     }
 
     printf("{\"account\":\"");
@@ -77,6 +77,5 @@ int print_transfer(char type, struct transfer *t)
     printf("}\n");
 
     fflush(stdout);
-    return 0;
+    return 1;
 }
-

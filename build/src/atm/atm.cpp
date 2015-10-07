@@ -59,7 +59,7 @@ int atm_main(int argc, char **argv)
             atm_transfer->type = optopt;
             if (!amt_set) {
                 amt_set = 1;
-                if (parse_money(&(atm_transfer->amt), optarg) == 255) {
+                if (!parse_money(&(atm_transfer->amt), optarg)) {
                     return 255;
                 }
             } else {
@@ -97,11 +97,11 @@ int atm_main(int argc, char **argv)
 
     auth_file_contents = (char *) malloc(SECURE_SIZE);
     if (auth_file_contents == NULL) {
-        ERR("[-] Unable to allocate");
+        ERR("[-] Unable to allocate\n");
         return 255;
     }
 
-    if (read_from_file(auth_file_contents, SECURE_SIZE, auth_file) == 255) {
+    if (!read_from_file(auth_file_contents, SECURE_SIZE, auth_file)) {
         return 255;
     }
 
@@ -111,24 +111,24 @@ int atm_main(int argc, char **argv)
             return 255;
         } else {
             random_bytes(atm_transfer->card_file, SECURE_SIZE);
-            if (write_to_file(atm_transfer->card_file, SECURE_SIZE, card_file) == 255) {
+            if (!write_to_file(atm_transfer->card_file, SECURE_SIZE, card_file)) {
                 return 255;
             }
         }
     } else {
-        if (read_from_file(atm_transfer->card_file, SECURE_SIZE, card_file) == 255) {
+        if (!read_from_file(atm_transfer->card_file, SECURE_SIZE, card_file)) {
             return 255;
         }
     }
 
-    if ((hsock = atm_connect(host_name, host_port)) == 63) {
+    if (!(hsock = atm_connect(host_name, host_port))) {
         return 63;
     }
 
     buffer = (char *) malloc(transfer_size);
     serialize(buffer, atm_transfer);
 
-    if (atm_send(hsock, buffer, transfer_size) == 63) {
+    if (!atm_send(hsock, buffer, transfer_size)) {
         return 63;
     }
 

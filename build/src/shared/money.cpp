@@ -14,16 +14,16 @@ int parse_money(struct money *amt, char *str)
     sscanf(str, "%u.%u", &dollars, &parse_cents);
     if (parse_cents >= 100) {
         ERR("[-] Invalid cents amount entered: %u\n", parse_cents);
-        return 255;
+        return 0;
     }
     cents = (uint8_t) parse_cents;
 
     amt->dollars = dollars;
     amt->cents = cents;
 
-    LOG("[+] Pared money: %u.%u\n", dollars, cents);
+    LOG("[+] Parsed money: %u.%u\n", dollars, cents);
 
-    return 0;
+    return 1;
 }
 
 bool add_money(struct money *a, struct money b)

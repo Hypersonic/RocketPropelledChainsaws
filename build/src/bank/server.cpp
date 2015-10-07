@@ -11,7 +11,7 @@ int bank_create_server()
 
     if ((hsock = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         ERR("[-] Error initializing socket %d\n", errno);
-        return 255;
+        return 0;
     }
 
     p_int = (int *) malloc(sizeof(int));
@@ -21,7 +21,7 @@ int bank_create_server()
         (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
         ERR("[-] Error setting options %d\n", errno);
         free(p_int);
-        return 255;
+        return 0;
     }
 
     free(p_int);
@@ -35,11 +35,11 @@ int bank_create_server()
     if (bind(hsock, (sockaddr *) &my_addr, sizeof(my_addr)) == -1){
         ERR("[-] Error binding to socket, make sure nothing else is listening on \
              this port: %d, %d\n", BANK_PORT, errno);
-        return 255;
+        return 0;
     }
     if (listen(hsock, 10) == -1){
         ERR("[-] Error listening %d\n", errno);
-        return 255;
+        return 0;
     }
 
     addr_size = sizeof(sockaddr_in);
@@ -55,7 +55,7 @@ int bank_create_server()
             ERR("[-] Error accepting %d\n", errno);
             puts("protocol_error");
             fflush(stdout);
-            return 255;
+            return 0;
         }
     }
 }
@@ -66,8 +66,8 @@ void *bank_socket_handler(void *lp)
     struct transfer *trans;
     struct money curr_balance;
 
-    char buffer[1024];
-    int buffer_len = 1024;
+    char buffer[sizeof(struct transfer)];
+    int buffer_len = sizeof(struct transfer);
     int bytecount;
 
     memset(buffer, 0, buffer_len);
@@ -88,7 +88,8 @@ void *bank_socket_handler(void *lp)
         return NULL;
     }
 
-    if (!deserialize(trans, buffer)) {
+    if (bytecount != sizeof(struct transfer)
+        || !deserialize(trans, buffer)) {
         ERR("Error deserializing transfer struct\n");
         puts("protocol_error");
         fflush(stdout);
@@ -108,7 +109,6 @@ void *bank_socket_handler(void *lp)
         db_insert(db, trans->name, trans->amt);
         /* TODO: print transfer */
         trans->type = 0; /* return code 0 */
-        serialize(buffer, trans);
         break;
     case 'd': /* deposit */
         if (!db_contains(db, trans->name)) {
@@ -181,8 +181,9 @@ void *bank_socket_handler(void *lp)
         server_close(csock);
         return NULL;
     }
+    serialize(buffer, trans);
 
-    if((bytecount = send(*csock, buffer, strlen(buffer), 0)) == -1){
+    if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
         ERR("Error sending data %d\n", errno);
         puts("protocol_error");
         fflush(stdout);
@@ -193,7 +194,7 @@ void *bank_socket_handler(void *lp)
     DEBUG("Sent bytes %d\n", bytecount);
 
     server_close(csock);
-    return 0;
+    return NULL;
 }
 
 void server_close(int *csock)
