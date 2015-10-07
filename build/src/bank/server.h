@@ -23,4 +23,6 @@ void *bank_socket_handler(void *socket);
 
 int bank_create_server(void *(*callback)(void *));
 
+void server_close(int *csock);
+
 #endif
