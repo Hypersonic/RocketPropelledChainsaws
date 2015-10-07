@@ -1,5 +1,9 @@
 #include "bank.h"
 
+void signal_handler(int signal) {
+    LOG("[*] Exiting server with signal: %d\n", signal);
+}
+
 /* Test duplicate inserts */
 UNUSED int test_db() {
     db_t *db = db_create();
@@ -18,8 +22,13 @@ UNUSED int test_db() {
 
 int bank_main(int argc, char **argv)
 {
-    char c, *auth_file, *end;
+    char c, *auth_file, *end, *auth_file_contents;
     int host_port = BANK_PORT;
+
+    signal(SIGINT, signal_handler);
+
+    auth_file_contents = NULL;
+    auth_file = NULL;
 
     LOG("Hello, Bank!\n");
 
@@ -51,6 +60,21 @@ int bank_main(int argc, char **argv)
             ERR("[-] Error while parsing options\n");
             return 255;
         }
+    }
+
+    if (auth_file == NULL) {
+        ERR("[-] Auth file not specified\n");
+        return 255;
+    }
+
+    auth_file_contents = (char *) malloc(SECURE_SIZE);
+    if (auth_file_contents == NULL) {
+        ERR("[-] Unable to allocate\n");
+        return 255;
+    }
+
+    if (read_from_file(auth_file_contents, SECURE_SIZE, auth_file) == 255) {
+        return 255;
     }
 
     bank_create_server();

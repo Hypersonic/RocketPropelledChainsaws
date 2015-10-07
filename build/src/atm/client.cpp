@@ -40,9 +40,9 @@ int atm_connect(char *host_name, int host_port)
 int atm_send(int hsock, char *buffer, unsigned buffer_len)
 {
     int bytecount;
-    struct transfer atm_transfer;
+    struct transfer *atm_transfer;
 
-    atm_transfer = (struct transfer *) malloc(transfer_size);
+    atm_transfer = (struct transfer *) malloc(sizeof(struct transfer));
     if (atm_transfer == NULL) {
         ERR("[-] Unable to allocate");
         return 255;
@@ -59,8 +59,6 @@ int atm_send(int hsock, char *buffer, unsigned buffer_len)
         return 63;
     }
     LOG("Recieved bytes %d\n", bytecount);
-
-    deserialize(, buffer);
 
     return 0;
 }
