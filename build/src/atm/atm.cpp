@@ -2,26 +2,21 @@
 
 int atm_main(int argc, char **argv)
 {
-    int hsock, host_port, c;
-    unsigned buffer_len;
-    char cmd;
+    int hsock, host_port, c, amt_set, acc_set;
+    unsigned transfer_size;
     char *buffer = NULL, *auth_file = NULL, *host_name = NULL,
-            *card_file = NULL, *account = NULL, *end = NULL;
-    struct money *amount;
+            *card_file = NULL, *end = NULL, *auth_file_contents = NULL;
+    struct transfer *atm_transfer;
 
-    cmd = '\0';
+    amt_set = 0;
+    acc_set = 0;
     host_port = 0;
-    amount = NULL;
+    transfer_size = sizeof(struct transfer);
+    atm_transfer = (struct transfer *) malloc(transfer_size);
+    atm_transfer->type = '\0';
 
     LOG("Hello, ATM!\n");
 
-    /*
-    TODO: Check if given parameters are a valid permutation of the spec's expected params
-    atm [-s <auth-file>] [-i <ip-address>] [-p <port>] [-c <card-file>] -a <account> -n <balance>
-    atm [-s <auth-file>] [-i <ip-address>] [-p <port>] [-c <card-file>] -a <account> -d <amount>
-    atm [-s <auth-file>] [-i <ip-address>] [-p <port>] [-c <card-file>] -a <account> -w <amount>
-    atm [-s <auth-file>] [-i <ip-address>] [-p <port>] [-c <card-file>] -a <account> -g
-    */
     while ((c = getopt(argc, argv, "s:i:p:c:a:n:d:g")) != -1) {
         switch (c) {
         case 's':
@@ -45,15 +40,21 @@ int atm_main(int argc, char **argv)
             card_file = optarg;
             break;
         case 'a':
-            account = optarg;
+            if (strlen(optarg) > 250) {
+                ERR("[-] Account name too long: %s\n", optarg);
+                return 255;
+            }
+            strcpy(atm_transfer->name, optarg);
+            atm_transfer->name[strlen(optarg)] = '\0';
+            acc_set = 1;
             break;
         case 'n':
         case 'd':
         case 'w':
-            cmd = optopt;
-            if (amount == NULL) {
-                amount = parse_money(optarg);
-                if (amount == NULL) {
+            atm_transfer->type = optopt;
+            if (!amt_set) {
+                amt_set = 1;
+                if (parse_money(&(atm_transfer->amt), optarg) == 255) {
                     return 255;
                 }
             } else {
@@ -62,7 +63,7 @@ int atm_main(int argc, char **argv)
             }
             break;
         case 'g':
-            cmd = optopt;
+            atm_transfer->type = optopt;
             break;
         case '?':
             if (optopt == 'c') {
@@ -79,7 +80,7 @@ int atm_main(int argc, char **argv)
         }
     }
 
-    if (auth_file == NULL || card_file == NULL || account == NULL) {
+    if (auth_file == NULL || card_file == NULL || acc_set == 0) {
         ERR("[-] Did not specify required options: auth-file, card-file, account\n");
         return 255;
     }
@@ -89,23 +90,42 @@ int atm_main(int argc, char **argv)
         return 255;
     }
 
+    auth_file_contents = (char *) malloc(SECURE_SIZE);
+    if (read_from_file(auth_file_contents, SECURE_SIZE, auth_file) == 255) {
+        return 255;
+    }
+
+    if (atm_transfer->type == 'n') {
+        if(access(card_file, F_OK) != -1) {
+            ERR("[-] Card already exists, you may not create another account with this card\n");
+            return 255;
+        } else {
+            random_bytes(atm_transfer->card_file, SECURE_SIZE);
+            if (write_to_file(atm_transfer->card_file, SECURE_SIZE, card_file) == 255) {
+                return 255;
+            }
+        }
+    } else {
+        if (read_from_file(atm_transfer->card_file, SECURE_SIZE, card_file) == 255) {
+            return 255;
+        }
+    }
+
     if ((hsock = atm_connect(host_name, host_port)) == 63) {
         return 63;
     }
 
-    // Testing message
-    const char *test = "LOL HI SERVER :3\x00";
-    buffer = (char *) malloc(strlen(test));
-    strcpy(buffer, test);
-    buffer_len = strlen(buffer);
+    buffer = (char *) malloc(transfer_size);
+    serialize(buffer, atm_transfer);
 
-    if (atm_send(hsock, buffer, buffer_len) == 63) {
+    if (atm_send(hsock, buffer, transfer_size) == 63) {
         return 63;
     }
 
     atm_close(hsock);
 
     free(buffer);
-    free(amount);
+    free(atm_transfer);
+    free(auth_file_contents);
     return 0;
 }

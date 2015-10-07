@@ -1,27 +1,24 @@
 #include "money.h"
 
-struct money *parse_money(char *str)
+int parse_money(struct money *amt, char *str)
 {
     uint64_t dollars;
     uint8_t cents;
     unsigned parse_cents;
-    struct money *parsed_money;
-
-    parsed_money = (struct money *) malloc(sizeof(struct money));
 
     sscanf(str, "%llu.%u", &dollars, &parse_cents);
     if (parse_cents >= 100) {
         ERR("[-] Invalid cents amount entered: %u\n", parse_cents);
-        return NULL;
+        return 255;
     }
     cents = (uint8_t) parse_cents;
 
-    parsed_money->dollars = dollars;
-    parsed_money->cents = cents;
+    amt->dollars = dollars;
+    amt->cents = cents;
 
     printf("%llu.%u\n", dollars, cents);
 
-    return parsed_money;
+    return 0;
 }
 
 bool add_money(struct money *a, struct money b)

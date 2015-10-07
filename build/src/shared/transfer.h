@@ -9,18 +9,18 @@ struct transfer {
     uint8_t type;
     char name[251];
     struct money amt;
-    char cardfile[256];
+    char card_file[256];
 };
 
 /* Serializes a transfer struct into a char pointer to be transferred
  * over the network, changing byteorder as needed.
  * Returns whether the serialization was a success
  */
-bool serialize(char *dst, struct transfer *src);
+int serialize(char *dst, struct transfer *src);
 
 /* Deserializes a char pointer into a transfer struct.
  * Returns whether the deserialization was a success
  */
-bool deserialize(struct transfer *dst, char *src);
+int deserialize(struct transfer *dst, char *src);
 
 #endif

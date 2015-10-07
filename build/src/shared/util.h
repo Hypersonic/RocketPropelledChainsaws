@@ -24,6 +24,10 @@ void hmac_init(HMAC_CTX *ctx, const char* key, size_t len);
 void hmac_update(HMAC_CTX *ctx, const char* bytes, size_t len);
 void hmac_digest(HMAC_CTX *ctx, char* digest);
 
-UNUSED int random_bytes(char* buf, size_t len);
+int random_bytes(char* buf, size_t len);
+
+unsigned get_file_size(const char * file_name);
+int read_from_file(char *dst, unsigned read_size, char *file_name);
+int write_to_file(char *src, unsigned write_size, char *file_name);
 
 #endif

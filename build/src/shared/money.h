@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #include <shared/macros.h>
 
 struct money {
@@ -21,6 +22,6 @@ bool add_money(struct money *a, struct money b);
  */
 bool subtract_money(struct money *a, struct money b);
 
-struct money *parse_money(char *str);
+int parse_money(struct money *dst, char *str);
 
 #endif
