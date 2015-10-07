@@ -13,6 +13,11 @@ int atm_main(int argc, char **argv)
     host_port = 0;
     transfer_size = sizeof(struct transfer);
     atm_transfer = (struct transfer *) malloc(transfer_size);
+    if (atm_transfer == NULL) {
+        ERR("[-] Unable to allocate");
+        return 255;
+    }
+
     atm_transfer->type = '\0';
 
     LOG("Hello, ATM!\n");
@@ -91,6 +96,11 @@ int atm_main(int argc, char **argv)
     }
 
     auth_file_contents = (char *) malloc(SECURE_SIZE);
+    if (auth_file_contents == NULL) {
+        ERR("[-] Unable to allocate");
+        return 255;
+    }
+
     if (read_from_file(auth_file_contents, SECURE_SIZE, auth_file) == 255) {
         return 255;
     }
