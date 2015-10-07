@@ -64,6 +64,7 @@ void *bank_socket_handler(void *lp)
 {
     int *csock = (int *) lp;
     struct transfer *trans;
+    struct money curr_balance;
 
     char buffer[1024];
     int buffer_len = 1024;
@@ -98,7 +99,7 @@ void *bank_socket_handler(void *lp)
 
     switch (trans->type) {
     case 'n': /* new account */
-        if (!db_contains(db, trans->name)) {
+        if (db_contains(db, trans->name)) {
             ERR("User already exists: \"%s\"\n", trans->name);
             /* TODO: send a response back to the client */
             server_close(csock);
@@ -110,10 +111,67 @@ void *bank_socket_handler(void *lp)
         serialize(buffer, trans);
         break;
     case 'd': /* deposit */
+        if (!db_contains(db, trans->name)) {
+            ERR("No such user: \"%s\"\n", trans->name);
+            /* TODO: send a response back to the client */
+            server_close(csock);
+            return NULL;
+        }
+        curr_balance = db_get(db, trans->name); 
+        if (!add_money(&curr_balance, trans->amt)) {
+            ERR("Balance would overflow, not adding\n");
+            /* TODO: send a response back to the client */
+            server_close(csock);
+            return NULL;
+        }
+        if (!db_update(db, trans->name, curr_balance)) {
+            ERR("Could not update DB with new balance, aborting!\n");
+            /* TODO: send a response back to the client */
+            server_close(csock);
+            return NULL;
+        }
+        trans->amt = curr_balance;
+        /* TODO: print transfer */
+        trans->type = 0; /* return code 0 */
+        serialize(buffer, trans);
         break;
     case 'w': /* withdraw */
+        if (!db_contains(db, trans->name)) {
+            ERR("No such user: \"%s\"\n", trans->name);
+            /* TODO: send a response back to the client */
+            server_close(csock);
+            return NULL;
+        }
+        curr_balance = db_get(db, trans->name); 
+        if (!subtract_money(&curr_balance, trans->amt)) {
+            ERR("Balance would overflow, not subtracting\n");
+            /* TODO: send a response back to the client */
+            server_close(csock);
+            return NULL;
+        }
+        if (!db_update(db, trans->name, curr_balance)) {
+            ERR("Could not update DB with new balance, aborting!\n");
+            /* TODO: send a response back to the client */
+            server_close(csock);
+            return NULL;
+        }
+        trans->amt = curr_balance;
+        /* TODO: print transfer */
+        trans->type = 0; /* return code 0 */
+        serialize(buffer, trans);
         break;
     case 'g': /* get balance */
+        if (!db_contains(db, trans->name)) {
+            ERR("No such user: \"%s\"\n", trans->name);
+            /* TODO: send a response back to the client */
+            server_close(csock);
+            return NULL;
+        }
+        curr_balance = db_get(db, trans->name); 
+        trans->amt = curr_balance;
+        /* TODO: print transfer */
+        trans->type = 0; /* return code 0 */
+        serialize(buffer, trans);
         break;
     default:  /* Error */
         ERR("Error deserializing transfer struct\n");
