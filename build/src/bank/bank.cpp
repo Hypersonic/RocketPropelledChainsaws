@@ -6,7 +6,6 @@ void signal_handler(int signal) {
 
 /* Test duplicate inserts */
 UNUSED int test_db() {
-    db_t *db = db_create();
     if (!db_insert(db, "asdf", {100, 1})) {
         return 255;
     }
@@ -30,7 +29,7 @@ int bank_main(int argc, char **argv)
     auth_file_contents = NULL;
     auth_file = NULL;
 
-    LOG("Hello, Bank!\n");
+    db = db_create(); /* initialize the global db */
 
     while ((c = getopt(argc, argv, "p:s:")) != -1) {
         switch (c) {

@@ -62,6 +62,7 @@ int bank_create_server()
 void *bank_socket_handler(void *lp)
 {
     int *csock = (int *) lp;
+    struct transfer *trans;
 
     char buffer[1024];
     int buffer_len = 1024;
@@ -74,8 +75,41 @@ void *bank_socket_handler(void *lp)
         fflush(stdout);
     }
 
-    DEBUG("Received bytes %d\nReceived string \"%s\"\n", bytecount, buffer);
-    strcat(buffer, " SERVER ECHO");
+    if (NULL == (trans = (struct transfer *) malloc(sizeof(struct transfer)))) {
+        ERR("Error allocating transfer struct\n");
+        puts("protocol_error");
+        fflush(stdout);
+        /* TODO: send a response back to the client */
+        free(csock);
+        return NULL;
+    }
+
+    if (!deserialize(trans, buffer)) {
+        ERR("Error deserializing transfer struct\n");
+        puts("protocol_error");
+        fflush(stdout);
+        /* TODO: send a response back to the client */
+        free(csock);
+        return NULL;
+    }
+
+    switch (trans->type) {
+    case 'n': /* new account */
+        break;
+    case 'd': /* deposit */
+        break;
+    case 'w': /* withdraw */
+        break;
+    case 'g': /* get balance */
+        break;
+    default:  /* Error */
+        ERR("Error deserializing transfer struct\n");
+        puts("protocol_error");
+        fflush(stdout);
+        /* TODO: send a response back to the client */
+        free(csock);
+        return NULL;
+    }
 
     if((bytecount = send(*csock, buffer, strlen(buffer), 0)) == -1){
         ERR("Error sending data %d\n", errno);
