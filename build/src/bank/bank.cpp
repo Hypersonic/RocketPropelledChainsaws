@@ -2,6 +2,7 @@
 
 void signal_handler(int signal) {
     LOG("[*] Exiting server with signal: %d\n", signal);
+    exit(0);
 }
 
 /* Test duplicate inserts */
