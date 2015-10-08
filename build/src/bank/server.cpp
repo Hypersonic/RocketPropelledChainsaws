@@ -33,8 +33,6 @@ int bank_create_server(int host_port)
 
     memset(&(my_addr.sin_zero), 0, 8);
     my_addr.sin_addr.s_addr = INADDR_ANY ;
-    char lol[255];
-    lol[10123] = 'a';
 
     if (bind(hsock, (sockaddr *) &my_addr, sizeof(my_addr)) == -1){
         ERR("[-] Error binding to socket, make sure nothing else is listening on \
