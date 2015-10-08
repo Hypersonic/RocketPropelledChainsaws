@@ -61,8 +61,7 @@ int bank_main(int argc, char **argv)
     }
 
     if (auth_file == NULL) {
-        ERR("[-] Auth file not specified\n");
-        return 255;
+        auth_file = (char *) "bank.auth";
     }
 
     if (access(auth_file, F_OK) != -1) {
