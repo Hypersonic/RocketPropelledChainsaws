@@ -8,7 +8,7 @@
 #include <map>
 
 typedef struct db_s {
-    pthread_mutex_t lock;
+    pthread_mutex_t balance_lock;
     std::map<std::string, struct money> *balances;
 } db_t;
 

@@ -9,7 +9,7 @@ db_t *db_create()
         return NULL;
     }
 
-    if (0 != pthread_mutex_init(&db->lock, NULL)) {
+    if (0 != pthread_mutex_init(&db->balance_lock, NULL)) {
         ERR("Could not initialize mutex on DB\n");
         free(db);
         return NULL;
@@ -22,7 +22,7 @@ db_t *db_create()
 
 bool db_destroy(db_t *db)
 {
-    if (0 != pthread_mutex_destroy(&db->lock)) {
+    if (0 != pthread_mutex_destroy(&db->balance_lock)) {
         ERR("Could not destroy DB mutex\n");
         return false;
     }
@@ -37,7 +37,7 @@ bool db_insert(db_t *db, std::string key, struct money value)
     assert(db != NULL);
 
 
-    if (0 != pthread_mutex_lock(&db->lock)) {
+    if (0 != pthread_mutex_lock(&db->balance_lock)) {
         LOG("Could not lock db\n");
         return false;
     }
@@ -51,7 +51,7 @@ bool db_insert(db_t *db, std::string key, struct money value)
     DEBUG("Inserting into DB, key \"%s\": $%u.%d\n", key.c_str(), value.dollars, value.cents);
     (*db->balances)[key] = value; /* insert the element */
 
-    if (0 != pthread_mutex_unlock(&db->lock)) {
+    if (0 != pthread_mutex_unlock(&db->balance_lock)) {
         LOG("Could not unlock db\n");
         return false;
     }
@@ -63,7 +63,7 @@ bool db_update(db_t *db, std::string key, struct money value)
 {
     assert(db != NULL);
 
-    if (0 != pthread_mutex_lock(&db->lock)) {
+    if (0 != pthread_mutex_lock(&db->balance_lock)) {
         LOG("Could not lock db\n");
         return false;
     }
@@ -77,7 +77,7 @@ bool db_update(db_t *db, std::string key, struct money value)
     DEBUG("Updating DB, key \"%s\": $%u.%d -> $%u.%d\n", key.c_str(), (*db->balances)[key].dollars, (*db->balances)[key].cents, value.dollars, value.cents);
     (*db->balances)[key] = value; /* change the element */
 
-    if (0 != pthread_mutex_unlock(&db->lock)) {
+    if (0 != pthread_mutex_unlock(&db->balance_lock)) {
         LOG("Could not unlock db\n");
         return false;
     }
