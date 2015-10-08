@@ -3,11 +3,17 @@ SOURCES = src
 BUILD   = build
 DEVEXT  = -dev
 
+.PHONY: all clean
+
 FLAGS  := -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11 -Isrc/
 BANK_FLAGS := -DBANK
 ATM_FLAGS := -DATM
 CFLAGS =
-LIBS   = -lpthread -lssl -lcrypto
+ifeq ($(MACHINE), Linux)
+	LIBS = -pthread 
+else
+	LIBS = -lpthread -lssl -lcrypto
+endif
 MKDIR  = mkdir -p
 RM     = rm -rf
 
@@ -30,11 +36,7 @@ ifdef DEBUG
 endif
 
 
-.PHONY: all clean
 
-ifeq ($(MACHINE), Linux)
-	FLAGS += -I/usr/include
-endif
 
 all: $(BANK_BNRY) $(ATM_BNRY)
 
