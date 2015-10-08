@@ -58,7 +58,7 @@ int atm_main(int argc, char **argv)
         case 'n':
         case 'd':
         case 'w':
-            atm_transfer->type = optopt;
+            atm_transfer->type = c;
             if (!amt_set) {
                 amt_set = 1;
                 if (!parse_money(&(atm_transfer->amt), optarg)) {

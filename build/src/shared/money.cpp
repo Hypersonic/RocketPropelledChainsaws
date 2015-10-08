@@ -32,7 +32,7 @@ bool add_money(struct money *a, struct money b)
     assert(b.cents < 100);
 
     if ((a->cents + b.cents) < 100) {
-        if (UINT32_MAX - a->dollars > b.dollars) {
+        if (UINT32_MAX - a->dollars < b.dollars) {
             // Dollars overflow
             return false;
         } else {
@@ -46,7 +46,7 @@ bool add_money(struct money *a, struct money b)
             // Overflow when 1 is added in carry
             return false;
         } else {
-            if (UINT32_MAX - (a->dollars + 1) > b.dollars) {
+            if (UINT32_MAX - (a->dollars + 1) < b.dollars) {
 				// Overflow when the carry would be applied
 				return false;
 			} else {
