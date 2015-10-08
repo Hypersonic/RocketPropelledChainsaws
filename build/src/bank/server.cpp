@@ -134,7 +134,6 @@ void *bank_socket_handler(void *lp)
         }
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
-        serialize(buffer, trans);
         break;
     case 'w': /* withdraw */
         if (!db_contains(db, trans->name)) {
@@ -158,7 +157,6 @@ void *bank_socket_handler(void *lp)
         }
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
-        serialize(buffer, trans);
         break;
     case 'g': /* get balance */
         if (!db_contains(db, trans->name)) {
@@ -170,7 +168,6 @@ void *bank_socket_handler(void *lp)
         curr_balance = db_get(db, trans->name); 
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
-        serialize(buffer, trans);
         break;
     default:  /* Error */
         ERR("Error deserializing transfer struct, unknown option %c\n", trans->type);
