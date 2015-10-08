@@ -70,12 +70,10 @@ int atm_main(int argc, char **argv)
             }
             break;
         case 'g':
-            atm_transfer->type = optopt;
+            atm_transfer->type = c;
             break;
         case '?':
-            if (optopt == 'c') {
-                ERR("[-] Option -%c requires an argument.\n", optopt);
-            } else if (isprint(optopt)){
+            if (isprint(optopt)){
                 ERR("[-] Unknown option `-%c'.\n", optopt);
             } else {
                 ERR("[-] Unknown option character `\\x%x'.\n", optopt);
