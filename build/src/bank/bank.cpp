@@ -64,8 +64,7 @@ int bank_main(int argc, char **argv)
         return 255;
     }
 
-    // TODO switch this if (access(auth_file, F_OK) != -1) {
-    if (access(auth_file, F_OK) == -1) {
+    if (access(auth_file, F_OK) != -1) {
         ERR("[-] Auth file already exists!\n");
         return 255;
     } else {

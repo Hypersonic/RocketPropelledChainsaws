@@ -45,7 +45,7 @@ int atm_main(int argc, char **argv)
             card_file = optarg;
             break;
         case 'a':
-            if (strlen(optarg) > 250) {
+            if (strlen(optarg) < 1 || strlen(optarg) > 250) {
                 ERR("[-] Account name too long: %s\n", optarg);
                 return 255;
             }

@@ -13,7 +13,6 @@
 #include <openssl/hmac.h>
 
 #include "shared/macros.h"
-#include "shared/transfer.h"
 
 int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt,
     EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx);
@@ -23,6 +22,9 @@ unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *le
 void hmac_init(HMAC_CTX *ctx, const char* key, size_t len);
 void hmac_update(HMAC_CTX *ctx, const char* bytes, size_t len);
 void hmac_digest(HMAC_CTX *ctx, char* digest);
+
+int is_valid_name(char *name);
+int is_valid_filename(char *filename);
 
 void print_escaped_string(char *str);
 int random_bytes(char* buf, size_t len);

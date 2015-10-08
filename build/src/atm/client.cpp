@@ -53,20 +53,25 @@ int atm_send(int hsock, char *buffer, unsigned buffer_len)
     }
 
     if ((bytecount = send(hsock, buffer, buffer_len, 0)) == -1) {
-        ERR("Error sending data %d\n", errno);
+        ERR("[-] Error sending data %d\n", errno);
         atm_close(hsock);
         return 0;
     }
-    LOG("Sent bytes %d\n", bytecount);
+    LOG("[+] Sent bytes %d\n", bytecount);
 
     if ((bytecount = recv(hsock, buffer, buffer_len, 0)) == -1) {
-        ERR("Error receiving data %d\n", errno);
+        ERR("[-] Error receiving data %d\n", errno);
         atm_close(hsock);
         return 0;
     }
-    LOG("Recieved bytes %d\n", bytecount);
+    LOG("[+] Recieved bytes %d\n", bytecount);
 
     deserialize(atm_transfer, buffer);
+
+    if (atm_transfer->type != 0) {
+        ERR("[-] Error during communication %d\n", atm_transfer->type);
+        return 0;
+    }
 
     print_transfer(type, atm_transfer);
 
