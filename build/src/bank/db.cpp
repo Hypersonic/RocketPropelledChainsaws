@@ -15,7 +15,14 @@ db_t *db_create()
         return NULL;
     }
 
+    if (0 != pthread_mutex_init(&db->nonce_lock, NULL)) {
+        ERR("Could not initialize mutex on DB\n");
+        free(db);
+        return NULL;
+    }
+
     db->balances = new std::map<std::string, struct money>();
+    db->nonces = new std::map<uint32_t, std::string>();
 
     return db;
 }
@@ -27,7 +34,13 @@ bool db_destroy(db_t *db)
         return false;
     }
 
+    if (0 != pthread_mutex_destroy(&db->nonce_lock)) {
+        ERR("Could not destroy DB mutex\n");
+        return false;
+    }
+
     delete db->balances;
+    delete db->nonces;
 
     return true;
 }
@@ -97,4 +110,59 @@ struct money db_get(db_t *db, std::string key)
     assert(db != NULL);
 
     return (*db->balances)[key];
+}
+
+/* Nonce ops */
+bool db_nonce_insert(db_t *db, uint32_t key, std::string value)
+{
+    assert(db != NULL);
+
+
+    if (0 != pthread_mutex_lock(&db->nonce_lock)) {
+        LOG("Could not lock nonce db\n");
+        return false;
+    }
+
+    /* if the db contains the key, we return an error */
+    if (db->nonces->end() != db->nonces->find(key)) {
+        LOG("nonces DB contained key %u already, cannot insert\n", key);
+        return false;
+    }
+
+    DEBUG("Inserting into nonce DB, key %u: %s\n", key, value.c_str());
+    (*db->nonces)[key] = value; /* insert the element */
+
+    if (0 != pthread_mutex_unlock(&db->nonce_lock)) {
+        LOG("Could not unlock nonce db\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool db_nonce_contains(db_t *db, uint32_t key)
+{
+    assert(db != NULL);
+
+    return db->nonces->end() != db->nonces->find(key);
+}
+
+std::string db_nonce_get(db_t *db, uint32_t key)
+{
+    assert(db != NULL);
+
+    return (*db->nonces)[key];
+
+}
+bool db_nonce_remove(db_t *db, uint32_t key)
+{
+    assert(db != NULL);
+
+    auto loc = db->nonces->find(key);
+    if (db->nonces->end() == loc) {
+        LOG("Could not find nonce in DB: %u\n", key);
+        return false;
+    }
+    db->nonces->erase(loc);
+    return true;
 }
