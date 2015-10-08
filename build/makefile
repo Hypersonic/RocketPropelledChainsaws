@@ -1,3 +1,4 @@
+MACHINE = $(shell uname -s)
 SOURCES = src
 BUILD   = build
 DEVEXT  = -dev
@@ -26,6 +27,11 @@ ifdef DEBUG
 	BANK_BNRY  := $(BANK_BNRY)$(DEVEXT)
 	FLAGS += -g -DDEBUG_MODE
 	MODE   = debug
+endif
+
+ifeq ($(MACHINE), Linux)
+	echo "You're on linux, adding /usr/include to your path"
+	FLAGS += -I/usr/include
 endif
 
 .PHONY: all clean
