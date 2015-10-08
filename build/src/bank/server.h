@@ -21,7 +21,7 @@ static db_t *db; /* global db */
 
 void *bank_socket_handler(void *socket);
 
-int bank_create_server(void *(*callback)(void *));
+int bank_create_server(int host_port);
 
 void server_close(int *csock);
 
