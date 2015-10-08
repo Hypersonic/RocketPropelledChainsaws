@@ -25,6 +25,7 @@ int bank_main(int argc, char **argv)
     int host_port = BANK_PORT;
 
     signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
 
     auth_file_contents = NULL;
     auth_file = NULL;
