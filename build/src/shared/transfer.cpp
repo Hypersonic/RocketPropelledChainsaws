@@ -87,9 +87,9 @@ int print_transfer(char type, struct transfer *t)
         return 0;
     }
 
-    printf("{");
+    printf("{\"%s\":\"", msg);
     print_money(&(t->amt));
-    printf("\",\"%s\":\"account\":\"", msg);
+    printf("\",\"account\":\"");
     print_escaped_string(t->name);
     printf("}\n");
 
