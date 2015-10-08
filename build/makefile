@@ -29,12 +29,12 @@ ifdef DEBUG
 	MODE   = debug
 endif
 
-ifeq ($(MACHINE), Linux)
-	echo "You're on linux, adding /usr/include to your path"
-	FLAGS += -I/usr/include
-endif
 
 .PHONY: all clean
+
+ifeq ($(MACHINE), Linux)
+	FLAGS += -I/usr/include
+endif
 
 all: $(BANK_BNRY) $(ATM_BNRY)
 
