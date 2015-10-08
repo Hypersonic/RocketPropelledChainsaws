@@ -14,9 +14,10 @@
 #include <unistd.h>
 #include "shared/macros.h"
 #include "shared/transfer.h"
+#include "shared/config.h"
 
 int atm_connect(char *host_name, int host_port);
-int atm_send(int hsock, char *buffer, unsigned buffer_len);
+int atm_send(int hsock, struct transfer *send_transfer);
 void atm_close(int hsock);
 
 #endif

@@ -8,6 +8,9 @@ int serialize(char *dst, struct transfer *src)
     dst[0] = src->type;
     cur_size += 1;
 
+    memcpy(dst + cur_size, &(src->nonce), sizeof(src->nonce));
+    cur_size += sizeof(src->nonce);
+
     memcpy(dst + cur_size, src->name, sizeof(src->name));
     cur_size += sizeof(src->name);
 
@@ -30,6 +33,9 @@ int deserialize(struct transfer *dst, char *src)
 
     dst->type = src[0];
     cur_size += 1;
+
+    memcpy(&(dst->nonce), src + cur_size, sizeof(dst->nonce));
+    cur_size += sizeof(dst->nonce);
 
     memcpy(dst->name, src + cur_size, sizeof(dst->name));
     cur_size += sizeof(dst->name);

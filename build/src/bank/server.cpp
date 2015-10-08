@@ -48,6 +48,7 @@ int bank_create_server(int host_port)
 
     while (true) {
         DEBUG("[*] Waiting for a connection\n");
+
         csock = (int *) malloc(sizeof(int));
         if ((*csock = accept(hsock, (sockaddr *)&sadr, &addr_size)) != -1) {
             DEBUG("[+] Received connection from %s\n", inet_ntoa(sadr.sin_addr));
@@ -64,49 +65,58 @@ int bank_create_server(int host_port)
 
 void *bank_socket_handler(void *lp)
 {
-    int *csock = (int *) lp;
+    uint32_t nonce;
+    int bytecount, buffer_len, *csock;
     struct transfer *trans;
     struct money curr_balance;
+    struct timeval tv;
 
     char buffer[sizeof(struct transfer)];
-    int buffer_len = sizeof(struct transfer);
-    int bytecount;
+    char tmp_nonce[NONCE_SIZE];
+
+    tv.tv_sec = 10;
+    tv.tv_usec = 0;
+    csock = (int *) lp;
+    buffer_len = sizeof(struct transfer);
+
+    if (setsockopt(*csock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
+        ERR("[-] Unable to set timeout: %d\n", errno);
+        return NULL;
+    }
+
+    random_bytes(tmp_nonce, NONCE_SIZE);
+    memcpy(&nonce, tmp_nonce, NONCE_SIZE);
+    if((bytecount = send(*csock, tmp_nonce, NONCE_SIZE, 0)) == -1){
+        ERR("Error sending data %d\n", errno);
+        goto NET_FAIL;
+    }
+
+    /* TODO: add nonce to database */
 
     memset(buffer, 0, buffer_len);
     if((bytecount = recv(*csock, buffer, buffer_len, 0)) == -1){
         ERR("Error receiving data %d\n", errno);
-        puts("protocol_error");
-        fflush(stdout);
-        server_close(csock);
-        return NULL;
+        goto NET_FAIL;
     }
 
     if (NULL == (trans = (struct transfer *) malloc(sizeof(struct transfer)))) {
         ERR("Error allocating transfer struct\n");
-        puts("protocol_error");
-        fflush(stdout);
-        /* TODO: send a response back to the client */
-        server_close(csock);
-        return NULL;
+        goto SER_FAIL;
     }
 
     if (bytecount != sizeof(struct transfer)
         || !deserialize(trans, buffer)) {
         ERR("Error deserializing transfer struct\n");
-        puts("protocol_error");
-        fflush(stdout);
-        /* TODO: send a response back to the client */
-        server_close(csock);
-        return NULL;
+        goto SER_FAIL;
     }
+
+    /* TODO: check nonce */
 
     switch (trans->type) {
     case 'n': /* new account */
         if (db_contains(db, trans->name)) {
             ERR("User already exists: \"%s\"\n", trans->name);
-            /* TODO: send a response back to the client */
-            server_close(csock);
-            return NULL;
+            goto SER_FAIL;
         }
         db_insert(db, trans->name, trans->amt);
         print_transfer(trans->type, trans);
@@ -115,22 +125,16 @@ void *bank_socket_handler(void *lp)
     case 'd': /* deposit */
         if (!db_contains(db, trans->name)) {
             ERR("No such user: \"%s\"\n", trans->name);
-            /* TODO: send a response back to the client */
-            server_close(csock);
-            return NULL;
+            goto SER_FAIL;
         }
         curr_balance = db_get(db, trans->name);
         if (!add_money(&curr_balance, trans->amt)) {
             ERR("Balance would overflow, not adding\n");
-            /* TODO: send a response back to the client */
-            server_close(csock);
-            return NULL;
+            goto SER_FAIL;
         }
         if (!db_update(db, trans->name, curr_balance)) {
             ERR("Could not update DB with new balance, aborting!\n");
-            /* TODO: send a response back to the client */
-            server_close(csock);
-            return NULL;
+            goto SER_FAIL;
         }
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
@@ -138,22 +142,16 @@ void *bank_socket_handler(void *lp)
     case 'w': /* withdraw */
         if (!db_contains(db, trans->name)) {
             ERR("No such user: \"%s\"\n", trans->name);
-            /* TODO: send a response back to the client */
-            server_close(csock);
-            return NULL;
+            goto SER_FAIL;
         }
         curr_balance = db_get(db, trans->name);
         if (!subtract_money(&curr_balance, trans->amt)) {
             ERR("Balance would overflow, not subtracting\n");
-            /* TODO: send a response back to the client */
-            server_close(csock);
-            return NULL;
+            goto SER_FAIL;
         }
         if (!db_update(db, trans->name, curr_balance)) {
             ERR("Could not update DB with new balance, aborting!\n");
-            /* TODO: send a response back to the client */
-            server_close(csock);
-            return NULL;
+            goto SER_FAIL;
         }
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
@@ -161,35 +159,39 @@ void *bank_socket_handler(void *lp)
     case 'g': /* get balance */
         if (!db_contains(db, trans->name)) {
             ERR("No such user: \"%s\"\n", trans->name);
-            /* TODO: send a response back to the client */
-            server_close(csock);
-            return NULL;
+            goto SER_FAIL;
         }
-        curr_balance = db_get(db, trans->name); 
+        curr_balance = db_get(db, trans->name);
         trans->amt = curr_balance;
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
         break;
     default:  /* Error */
         ERR("Error deserializing transfer struct, unknown option %c\n", trans->type);
-        puts("protocol_error");
-        fflush(stdout);
-        /* TODO: send a response back to the client */
-        server_close(csock);
-        return NULL;
+        goto SER_FAIL;
     }
     serialize(buffer, trans);
 
     if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
         ERR("Error sending data %d\n", errno);
-        puts("protocol_error");
-        fflush(stdout);
-        server_close(csock);
-        return NULL;
+        goto NET_FAIL;
     }
 
     DEBUG("Sent bytes %d\n", bytecount);
 
+    server_close(csock);
+    return NULL;
+
+SER_FAIL:
+    puts("protocol_error");
+    fflush(stdout);
+
+    trans->type = 255;
+    serialize(buffer, trans);
+    if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
+        ERR("Error sending data %d\n", errno);
+    }
+NET_FAIL:
     server_close(csock);
     return NULL;
 }

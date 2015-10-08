@@ -8,6 +8,7 @@
 
 struct transfer {
     uint8_t type;
+    uint32_t nonce;
     char name[251];
     struct money amt;
     char card_file[256];

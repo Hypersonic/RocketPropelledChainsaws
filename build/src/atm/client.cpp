@@ -37,13 +37,24 @@ int atm_connect(char *host_name, int host_port)
     return hsock;
 }
 
-int atm_send(int hsock, char *buffer, unsigned buffer_len)
+int atm_send(int hsock, struct transfer *send_transfer)
 {
     int bytecount;
     struct transfer *atm_transfer;
-    char type;
+    struct timeval tv;
+    tv.tv_sec = 10;
+    tv.tv_usec = 0;
 
-    type = buffer[0];
+    char buffer[sizeof(struct transfer)];
+    char tmp_nonce[NONCE_SIZE];
+    int buffer_len = sizeof(struct transfer);
+
+    serialize(buffer, send_transfer);
+
+    if (setsockopt(hsock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
+        ERR("[-] Unable to set timeout: %d\n", errno);
+        return 0;
+    }
 
     atm_transfer = (struct transfer *) malloc(sizeof(struct transfer));
     if (atm_transfer == NULL) {
@@ -51,6 +62,15 @@ int atm_send(int hsock, char *buffer, unsigned buffer_len)
         atm_close(hsock);
         return 0;
     }
+
+    if ((bytecount = recv(hsock, tmp_nonce, NONCE_SIZE, 0)) == -1) {
+        ERR("[-] Error receiving data %d\n", errno);
+        atm_close(hsock);
+        return 0;
+    }
+    LOG("[+] Recieved bytes %d\n", bytecount);
+
+    memcpy(&(atm_transfer->nonce), tmp_nonce, NONCE_SIZE);
 
     if ((bytecount = send(hsock, buffer, buffer_len, 0)) == -1) {
         ERR("[-] Error sending data %d\n", errno);
@@ -73,7 +93,7 @@ int atm_send(int hsock, char *buffer, unsigned buffer_len)
         return 0;
     }
 
-    print_transfer(type, atm_transfer);
+    print_transfer(send_transfer->type, atm_transfer);
 
     free(atm_transfer);
     atm_close(hsock);

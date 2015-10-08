@@ -4,7 +4,7 @@ int atm_main(int argc, char **argv)
 {
     int hsock, host_port, c, amt_set, acc_set;
     unsigned transfer_size;
-    char *buffer = NULL, *auth_file = NULL, *host_name = NULL,
+    char *auth_file = NULL, *host_name = NULL,
             *card_file = NULL, *end = NULL, *auth_file_contents = NULL;
     struct transfer *atm_transfer;
 
@@ -22,7 +22,7 @@ int atm_main(int argc, char **argv)
 
     LOG("Hello, ATM!\n");
 
-    while ((c = getopt(argc, argv, "s:i:p:c:a:n:d:g")) != -1) {
+    while ((c = getopt(argc, argv, "s:i:p:c:a:n:d:w:g")) != -1) {
         switch (c) {
         case 's':
             auth_file = optarg;
@@ -125,16 +125,12 @@ int atm_main(int argc, char **argv)
         return 63;
     }
 
-    buffer = (char *) malloc(transfer_size);
-    serialize(buffer, atm_transfer);
-
-    if (!atm_send(hsock, buffer, transfer_size)) {
+    if (!atm_send(hsock, atm_transfer)) {
         return 63;
     }
 
     atm_close(hsock);
 
-    free(buffer);
     free(atm_transfer);
     free(auth_file_contents);
     return 0;
