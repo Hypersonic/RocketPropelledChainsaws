@@ -47,7 +47,7 @@ int bank_main(int argc, char **argv)
         case '?':
             if (optopt == 'c') {
                 ERR("[-] Option -%c requires an argument.\n", optopt);
-            } else if (isprint(optopt)){
+            } else if (isprint(optopt)) {
                 ERR("[-] Unknown option `-%c'.\n", optopt);
             } else {
                 ERR("[-] Unknown option character `\\x%x'.\n", optopt);
@@ -83,7 +83,7 @@ int bank_main(int argc, char **argv)
         fflush(stdout);
     }
 
-    if (!bank_create_server()) {
+    if (!bank_create_server(host_port)) {
         return 255;
     }
     return 0;

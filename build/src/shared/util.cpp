@@ -6,7 +6,7 @@ void print_escaped_string(char *str)
 
     len = strlen(str);
     for (i = 0; i < len; i++) {
-        if (str[i] == '"') putc('\\', stdout);
+        if (str[i] == '"' || str[i] == '\'') putc('\\', stdout);
         putc(str[i], stdout);
     }
 }

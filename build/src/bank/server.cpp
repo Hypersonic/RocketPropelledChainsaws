@@ -1,6 +1,6 @@
 #include "server.h"
 
-int bank_create_server()
+int bank_create_server(int host_port)
 {
     struct sockaddr_in my_addr;
     int hsock, *p_int, *csock;
@@ -29,14 +29,14 @@ int bank_create_server()
     free(p_int);
 
     my_addr.sin_family = AF_INET ;
-    my_addr.sin_port = htons(BANK_PORT);
+    my_addr.sin_port = htons(host_port);
 
     memset(&(my_addr.sin_zero), 0, 8);
     my_addr.sin_addr.s_addr = INADDR_ANY ;
 
     if (bind(hsock, (sockaddr *) &my_addr, sizeof(my_addr)) == -1){
         ERR("[-] Error binding to socket, make sure nothing else is listening on \
-             this port: %d, %d\n", BANK_PORT, errno);
+             this port: %d, %d\n", host_port, errno);
         return 0;
     }
     if (listen(hsock, 10) == -1){
@@ -50,7 +50,7 @@ int bank_create_server()
         DEBUG("[*] Waiting for a connection\n");
         csock = (int *) malloc(sizeof(int));
         if ((*csock = accept(hsock, (sockaddr *)&sadr, &addr_size)) != -1) {
-            DEBUG("---------------------\nReceived connection from %s\n", inet_ntoa(sadr.sin_addr));
+            DEBUG("[+] Received connection from %s\n", inet_ntoa(sadr.sin_addr));
             pthread_create(&thread_id, 0, &bank_socket_handler, (void *)csock);
             pthread_detach(thread_id);
         } else {
@@ -119,7 +119,7 @@ void *bank_socket_handler(void *lp)
             server_close(csock);
             return NULL;
         }
-        curr_balance = db_get(db, trans->name); 
+        curr_balance = db_get(db, trans->name);
         if (!add_money(&curr_balance, trans->amt)) {
             ERR("Balance would overflow, not adding\n");
             /* TODO: send a response back to the client */
@@ -144,7 +144,7 @@ void *bank_socket_handler(void *lp)
             server_close(csock);
             return NULL;
         }
-        curr_balance = db_get(db, trans->name); 
+        curr_balance = db_get(db, trans->name);
         if (!subtract_money(&curr_balance, trans->amt)) {
             ERR("Balance would overflow, not subtracting\n");
             /* TODO: send a response back to the client */
@@ -169,7 +169,7 @@ void *bank_socket_handler(void *lp)
             server_close(csock);
             return NULL;
         }
-        curr_balance = db_get(db, trans->name); 
+        curr_balance = db_get(db, trans->name);
         trans->amt = curr_balance;
         /* TODO: print transfer */
         trans->type = 0; /* return code 0 */
