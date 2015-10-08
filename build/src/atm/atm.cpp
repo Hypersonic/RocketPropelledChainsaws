@@ -109,6 +109,11 @@ int atm_main(int argc, char **argv)
         return 255;
     }
 
+    if (trans_set == 0) {
+        ERR("[-] Did not specify option\n");
+        return 255;
+    }
+
     if (host_name == NULL || host_port == 0) {
         ERR("[-] Did not specify a bank to connect to\n");
         return 255;
