@@ -2,7 +2,7 @@
 
 int atm_main(int argc, char **argv)
 {
-    int hsock, host_port, c, amt_set, acc_set, free_card;
+    int hsock, host_port, c, amt_set, acc_set, free_card, trans_set;
     unsigned transfer_size;
     char *auth_file = NULL, *host_name = NULL,
             *card_file = NULL, *end = NULL, *auth_file_contents = NULL;
@@ -10,7 +10,8 @@ int atm_main(int argc, char **argv)
 
     amt_set = 0;
     acc_set = 0;
-    host_port = 0;
+    trans_set = 0;
+    host_port = BANK_PORT;
     host_name = (char *) "127.0.0.1";
     transfer_size = sizeof(struct transfer);
     atm_transfer = (struct transfer *) malloc(transfer_size);
@@ -68,6 +69,7 @@ int atm_main(int argc, char **argv)
                 ERR("[-] Additional optional command specified");
                 return 255;
             }
+            trans_set = 1;
             break;
         case 'g':
             atm_transfer->type = c;
