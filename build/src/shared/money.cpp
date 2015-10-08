@@ -28,17 +28,15 @@ int parse_money(struct money *amt, char *str)
 
 bool add_money(struct money *a, struct money b)
 {
-    uint32_t result;
-
     assert(a->cents < 100);
     assert(b.cents < 100);
 
     if ((a->cents + b.cents) < 100) {
-        if (__builtin_uadd_overflow(a->dollars, b.dollars, &result)) {
+        if (UINT32_MAX - a->dollars > b.dollars) {
             // Dollars overflow
             return false;
         } else {
-            a->dollars = result;
+            a->dollars = a->dollars + b.dollars;
             a->cents = a->cents + b.cents;
 
             return true;
@@ -48,32 +46,31 @@ bool add_money(struct money *a, struct money b)
             // Overflow when 1 is added in carry
             return false;
         } else {
-            if (__builtin_uadd_overflow(a->dollars + 1, b.dollars, &result)) {
+            if (UINT32_MAX - (a->dollars + 1) > b.dollars) {
 				// Overflow when the carry would be applied
 				return false;
 			} else {
-				a->dollars = result;
+				a->dollars = (a->dollars + 1) + b.dollars;
 				a->cents = (a->cents + b.cents) % 100;
 
 				return true;
 			}
 		}
     }
+    return true;
 }
 
 bool subtract_money(struct money *a, struct money b)
 {
-    uint32_t result;
-
     assert(a->cents < 100);
     assert(b.cents < 100);
 
     if (b.cents <= a->cents) {
-        if (__builtin_usub_overflow(a->dollars, b.dollars, &result)) {
+        if (a->dollars < b.dollars) {
             // Dollars overflow
             return false;
         } else {
-            a->dollars = result;
+            a->dollars = a->dollars - b.dollars;
             a->cents = a->cents - b.cents;
 
             return true;
@@ -83,15 +80,16 @@ bool subtract_money(struct money *a, struct money b)
             // Overflow from cents
             return false;
         } else {
-            if (__builtin_usub_overflow(a->dollars - 1, b.dollars, &result)) {
+            if ((a->dollars + 1) < b.dollars) {
 				// Overflow when the carry would be applied
 				return false;
 			} else {
-				a->dollars = result;
+				a->dollars = (a->dollars + 1) - b.dollars;
 				a->cents = (100 + a->cents) - b.cents;
 
 				return true;
 			}
 		}
     }
+    return true;
 }
