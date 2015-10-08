@@ -166,6 +166,7 @@ void *bank_socket_handler(void *lp)
             return NULL;
         }
         curr_balance = db_get(db, trans->name); 
+        trans->amt = curr_balance;
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
         break;
