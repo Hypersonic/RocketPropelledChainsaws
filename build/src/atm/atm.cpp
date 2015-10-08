@@ -73,6 +73,7 @@ int atm_main(int argc, char **argv)
             break;
         case 'g':
             atm_transfer->type = c;
+            trans_set = 1;
             break;
         case '?':
             if (isprint(optopt)){
