@@ -109,7 +109,7 @@ void *bank_socket_handler(void *lp)
             return NULL;
         }
         db_insert(db, trans->name, trans->amt);
-        /* TODO: print transfer */
+        print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
         break;
     case 'd': /* deposit */
@@ -132,8 +132,7 @@ void *bank_socket_handler(void *lp)
             server_close(csock);
             return NULL;
         }
-        trans->amt = curr_balance;
-        /* TODO: print transfer */
+        print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
         serialize(buffer, trans);
         break;
@@ -157,8 +156,7 @@ void *bank_socket_handler(void *lp)
             server_close(csock);
             return NULL;
         }
-        trans->amt = curr_balance;
-        /* TODO: print transfer */
+        print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
         serialize(buffer, trans);
         break;
@@ -169,9 +167,8 @@ void *bank_socket_handler(void *lp)
             server_close(csock);
             return NULL;
         }
-        curr_balance = db_get(db, trans->name);
-        trans->amt = curr_balance;
-        /* TODO: print transfer */
+        curr_balance = db_get(db, trans->name); 
+        print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
         serialize(buffer, trans);
         break;
