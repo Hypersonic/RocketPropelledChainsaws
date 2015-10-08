@@ -6,6 +6,8 @@ int bank_create_server()
     int hsock, *p_int, *csock;
     sockaddr_in sadr;
 
+    db = db_create(); /* initialize the global db */
+
     socklen_t addr_size = 0;
     pthread_t thread_id = 0;
 

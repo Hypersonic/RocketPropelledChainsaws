@@ -29,8 +29,6 @@ int bank_main(int argc, char **argv)
     auth_file_contents = NULL;
     auth_file = NULL;
 
-    db = db_create(); /* initialize the global db */
-
     while ((c = getopt(argc, argv, "p:s:")) != -1) {
         switch (c) {
         case 's':
