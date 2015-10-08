@@ -17,7 +17,8 @@
 #include "shared/transfer.h"
 #include "bank/db.h"
 
-static db_t *db; /* global db */
+/* not actually unused but compiler on linux complains */ 
+UNUSED static db_t *db; /* global db */
 
 void *bank_socket_handler(void *socket);
 
