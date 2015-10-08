@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <map>
+#include <string>
 
 typedef struct db_s {
     pthread_mutex_t balance_lock;
