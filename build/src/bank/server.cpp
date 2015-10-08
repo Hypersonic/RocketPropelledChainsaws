@@ -99,8 +99,6 @@ void *bank_socket_handler(void *lp)
         goto NET_FAIL;
     }
 
-    sleep(20);
-
     if (NULL == (trans = (struct transfer *) malloc(sizeof(struct transfer)))) {
         ERR("Error allocating transfer struct\n");
         goto SER_FAIL;
