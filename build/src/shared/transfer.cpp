@@ -87,11 +87,11 @@ int print_transfer(char type, struct transfer *t)
         return 0;
     }
 
-    printf("{\"%s\":\"", msg);
+    printf("{\"%s\":", msg);
     print_money(&(t->amt));
-    printf("\",\"account\":\"");
+    printf(",\"account\":\"");
     print_escaped_string(t->name);
-    printf("}\n");
+    printf("\"}\n");
 
     fflush(stdout);
     return 1;
