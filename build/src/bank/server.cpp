@@ -174,7 +174,7 @@ void *bank_socket_handler(void *lp)
         serialize(buffer, trans);
         break;
     default:  /* Error */
-        ERR("Error deserializing transfer struct\n");
+        ERR("Error deserializing transfer struct, unknown option %c\n", trans->type);
         puts("protocol_error");
         fflush(stdout);
         /* TODO: send a response back to the client */
