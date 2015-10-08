@@ -2,7 +2,7 @@
 
 void print_money(struct money *amt)
 {
-    printf("%u.%u", amt->dollars, amt->cents);
+    printf("%u.%02u", amt->dollars, amt->cents);
 }
 
 int parse_money(struct money *amt, char *str)
