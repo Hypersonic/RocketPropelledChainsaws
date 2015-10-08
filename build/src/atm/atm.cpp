@@ -2,7 +2,7 @@
 
 int atm_main(int argc, char **argv)
 {
-    int hsock, host_port, c, amt_set, acc_set;
+    int hsock, host_port, c, amt_set, acc_set, free_card;
     unsigned transfer_size;
     char *auth_file = NULL, *host_name = NULL,
             *card_file = NULL, *end = NULL, *auth_file_contents = NULL;
@@ -11,6 +11,7 @@ int atm_main(int argc, char **argv)
     amt_set = 0;
     acc_set = 0;
     host_port = 0;
+    host_name = (char *) "127.0.0.1";
     transfer_size = sizeof(struct transfer);
     atm_transfer = (struct transfer *) malloc(transfer_size);
     if (atm_transfer == NULL) {
@@ -43,6 +44,7 @@ int atm_main(int argc, char **argv)
             break;
         case 'c':
             card_file = optarg;
+            free_card = 0;
             break;
         case 'a':
             if (strlen(optarg) < 1 || strlen(optarg) > 250) {
@@ -85,8 +87,25 @@ int atm_main(int argc, char **argv)
         }
     }
 
-    if (auth_file == NULL || card_file == NULL || acc_set == 0) {
-        ERR("[-] Did not specify required options: auth-file, card-file, account\n");
+    if (auth_file == NULL) {
+        auth_file = (char *) "bank.auth";
+    }
+
+    if (card_file == NULL && acc_set) {
+        if ((card_file = (char *) malloc(strlen(atm_transfer->name) + 6)) == NULL) {
+            ERR("[-] Unable to allocate\n");
+            return 255;
+        }
+        strcpy(card_file, atm_transfer->name);
+        strcat(card_file, (char *) ".card");
+        free_card = 1;
+    } else {
+        ERR("[-] Did not specify name\n");
+        return 255;
+    }
+
+    if (acc_set == 0) {
+        ERR("[-] Did not specify name\n");
         return 255;
     }
 
@@ -131,6 +150,9 @@ int atm_main(int argc, char **argv)
 
     atm_close(hsock);
 
+    if (free_card) {
+        free(card_file);
+    }
     free(atm_transfer);
     free(auth_file_contents);
     return 0;
