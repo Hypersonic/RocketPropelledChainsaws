@@ -10,7 +10,25 @@ int parse_money(struct money *amt, char *str)
     uint32_t dollars;
     uint8_t cents;
     unsigned parse_cents;
+    char *decimal;
 
+    if (strlen(str) < 4) {
+        ERR("[-] Invalid money amount given: %s\n", str);
+        return 0;
+    }
+
+    if (str[0] == '0' && str[1] != '.') {
+        ERR("[-] Leading zero in given money: %s\n", str);
+        return 0;
+    }
+    if ((decimal = strchr(str, '.')) == NULL) {
+        ERR("[-] No decimal in: %s\n", str);
+        return 0;
+    }
+    if (strlen(decimal) != 3) {
+        ERR("[-] Invalid decimal given: %s\n", str);
+        return 0;
+    }
     sscanf(str, "%u.%u", &dollars, &parse_cents);
     if (parse_cents >= 100) {
         ERR("[-] Invalid cents amount entered: %u\n", parse_cents);
@@ -92,4 +110,14 @@ bool subtract_money(struct money *a, struct money b)
 		}
     }
     return true;
+}
+
+uint32_t compare_money(struct money *a, struct money *b) {
+    uint32_t dollar_diff;
+
+    if ((dollar_diff = a->dollars - b->dollars) == 0) {
+        return (uint_32_t) a->cents - b->cents;
+    } else {
+        return dollar_diff;
+    }
 }

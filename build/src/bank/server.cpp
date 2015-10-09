@@ -193,16 +193,18 @@ void *bank_socket_handler(void *lp)
     return NULL;
 
 SER_FAIL:
-    puts("protocol_error");
-    fflush(stdout);
-
     trans->type = 255;
     serialize(buffer, trans);
     if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
         ERR("Error sending data %d\n", errno);
     }
+    server_close(csock);
+    return NULL;
 NET_FAIL:
     db_nonce_remove(db, nonce);
+    puts("protocol_error");
+    fflush(stdout);
+
     server_close(csock);
     return NULL;
 }

@@ -27,6 +27,10 @@ int atm_main(int argc, char **argv)
     while ((c = getopt(argc, argv, "s:i:p:c:a:n:d:w:g")) != -1) {
         switch (c) {
         case 's':
+            if (!is_valid_filename(optarg)) {
+                ERR("[-] Invalid account filename: %s\n", optarg);
+                return 255;
+            }
             auth_file = optarg;
             break;
         case 'i':
@@ -50,6 +54,10 @@ int atm_main(int argc, char **argv)
         case 'a':
             if (strlen(optarg) < 1 || strlen(optarg) > 250) {
                 ERR("[-] Account name too long: %s\n", optarg);
+                return 255;
+            }
+            if (!is_valid_name(optarg)) {
+                ERR("[-] Invalid account name: %s\n", optarg);
                 return 255;
             }
             strcpy(atm_transfer->name, optarg);
@@ -100,9 +108,6 @@ int atm_main(int argc, char **argv)
         strcpy(card_file, atm_transfer->name);
         strcat(card_file, (char *) ".card");
         free_card = 1;
-    } else {
-        ERR("[-] Did not specify name\n");
-        return 255;
     }
 
     if (acc_set == 0) {
@@ -147,10 +152,16 @@ int atm_main(int argc, char **argv)
     }
 
     if (!(hsock = atm_connect(host_name, host_port))) {
-        return 63;
+        if (remove(card_file) != 0) {
+            ERR("[-] Unable to remove card file: %s", card_file);
+        }
+        return 255;
     }
 
     if (!atm_send(hsock, atm_transfer)) {
+        if (remove(card_file) != 0) {
+            ERR("[-] Unable to remove card file: %s", card_file);
+        }
         return 63;
     }
 

@@ -53,20 +53,18 @@ int atm_send(int hsock, struct transfer *send_transfer)
 
     if (setsockopt(hsock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
         ERR("[-] Unable to set timeout: %d\n", errno);
-        return 0;
+        goto FAIL;
     }
 
     atm_transfer = (struct transfer *) malloc(sizeof(struct transfer));
     if (atm_transfer == NULL) {
         ERR("[-] Unable to allocate");
-        atm_close(hsock);
-        return 0;
+        goto FAIL;
     }
 
     if ((bytecount = recv(hsock, tmp_nonce, NONCE_SIZE, 0)) == -1) {
         ERR("[-] Error receiving data %d\n", errno);
-        atm_close(hsock);
-        return 0;
+        goto FAIL;
     }
     LOG("[+] Recieved bytes %d\n", bytecount);
 
@@ -74,15 +72,13 @@ int atm_send(int hsock, struct transfer *send_transfer)
 
     if ((bytecount = send(hsock, buffer, buffer_len, 0)) == -1) {
         ERR("[-] Error sending data %d\n", errno);
-        atm_close(hsock);
-        return 0;
+        goto FAIL;
     }
     LOG("[+] Sent bytes %d\n", bytecount);
 
     if ((bytecount = recv(hsock, buffer, buffer_len, 0)) == -1) {
         ERR("[-] Error receiving data %d\n", errno);
-        atm_close(hsock);
-        return 0;
+        goto FAIL;
     }
     LOG("[+] Recieved bytes %d\n", bytecount);
 
@@ -90,7 +86,7 @@ int atm_send(int hsock, struct transfer *send_transfer)
 
     if (atm_transfer->type != 0) {
         ERR("[-] Error during communication %d\n", atm_transfer->type);
-        return 0;
+        goto FAIL;
     }
 
     print_transfer(send_transfer->type, atm_transfer);
@@ -98,6 +94,9 @@ int atm_send(int hsock, struct transfer *send_transfer)
     free(atm_transfer);
     atm_close(hsock);
     return 1;
+FAIL:
+    atm_close(hsock);
+    return 0;
 }
 
 void atm_close(int hsock)

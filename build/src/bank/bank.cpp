@@ -34,6 +34,10 @@ int bank_main(int argc, char **argv)
     while ((c = getopt(argc, argv, "p:s:")) != -1) {
         switch (c) {
         case 's':
+            if (!is_valid_filename(optarg)) {
+                ERR("[-] Invalid file name: %s\n", optarg);
+                return 255;
+            }
             auth_file = optarg;
             break;
         case 'p':
