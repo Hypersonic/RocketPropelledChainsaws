@@ -84,14 +84,19 @@ void *bank_socket_handler(void *lp)
         return NULL;
     }
 
-    random_bytes(tmp_nonce, NONCE_SIZE);
-    memcpy(&nonce, tmp_nonce, NONCE_SIZE);
+    /* Generate a unique nonce */
+    do {
+        random_bytes(tmp_nonce, NONCE_SIZE);
+        memcpy(&nonce, tmp_nonce, NONCE_SIZE);
+    } while (db_nonce_contains(db, nonce));
+
+    /* insert into DB */
+    db_nonce_insert(db, nonce, true);
+
     if((bytecount = send(*csock, tmp_nonce, NONCE_SIZE, 0)) == -1){
         ERR("Error sending data %d\n", errno);
         goto NET_FAIL;
     }
-
-    /* TODO: add nonce to database */
 
     memset(buffer, 0, buffer_len);
     if((bytecount = recv(*csock, buffer, buffer_len, 0)) == -1){
@@ -110,7 +115,12 @@ void *bank_socket_handler(void *lp)
         goto SER_FAIL;
     }
 
-    /* TODO: check nonce */
+    if (!db_nonce_contains(db, trans->nonce)) {
+        ERR("Nonce mismatch, aborting!\n");
+        goto SER_FAIL;
+    } else {
+        db_nonce_remove(db, trans->nonce);
+    }
 
     switch (trans->type) {
     case 'n': /* new account */
@@ -192,6 +202,7 @@ SER_FAIL:
         ERR("Error sending data %d\n", errno);
     }
 NET_FAIL:
+    db_nonce_remove(db, nonce);
     server_close(csock);
     return NULL;
 }
