@@ -13,7 +13,7 @@ typedef struct db_s {
     pthread_mutex_t balance_lock;
     std::map<std::string, struct money> *balances;
     pthread_mutex_t nonce_lock;
-    std::map<uint32_t, std::string> *nonces;
+    std::map<uint32_t, bool> *nonces;
 } db_t;
 
 /* Create a new DB.
@@ -59,7 +59,7 @@ struct money db_get(db_t *db, std::string key);
  *
  * Returns whether the operation was a success
  * */
-bool db_nonce_insert(db_t *db, std::string key, uint32_t value);
+bool db_nonce_insert(db_t *db, uint32_t key, bool value);
 
 /* Return whether a db contains a given key
  */
@@ -72,7 +72,7 @@ bool db_nonce_contains(db_t *db, uint32_t key);
  *
  * Returns the user associated with the key.
  */
-std::string db_nonce_get(db_t *db, uint32_t key);
+bool db_nonce_get(db_t *db, uint32_t key);
 
 /* Remove a key from the DB.
  * returns whether the op was a success

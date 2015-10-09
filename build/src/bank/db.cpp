@@ -22,7 +22,7 @@ db_t *db_create()
     }
 
     db->balances = new std::map<std::string, struct money>();
-    db->nonces = new std::map<uint32_t, std::string>();
+    db->nonces = new std::map<uint32_t, bool>();
 
     return db;
 }
@@ -113,7 +113,7 @@ struct money db_get(db_t *db, std::string key)
 }
 
 /* Nonce ops */
-bool db_nonce_insert(db_t *db, uint32_t key, std::string value)
+bool db_nonce_insert(db_t *db, uint32_t key, bool value)
 {
     assert(db != NULL);
 
@@ -147,7 +147,7 @@ bool db_nonce_contains(db_t *db, uint32_t key)
     return db->nonces->end() != db->nonces->find(key);
 }
 
-std::string db_nonce_get(db_t *db, uint32_t key)
+bool db_nonce_get(db_t *db, uint32_t key)
 {
     assert(db != NULL);
 
