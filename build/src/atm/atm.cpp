@@ -3,7 +3,7 @@
 int atm_main(int argc, char **argv)
 {
     int hsock, host_port, c, amt_set, acc_set, free_card, trans_set;
-    unsigned transfer_size;
+    unsigned transfer_size, client_ret;
     char *auth_file = NULL, *host_name = NULL,
             *card_file = NULL, *end = NULL, *auth_file_contents = NULL;
     struct transfer *atm_transfer;
@@ -158,11 +158,18 @@ int atm_main(int argc, char **argv)
         return 255;
     }
 
-    if (!atm_send(hsock, atm_transfer)) {
+    if (!(client_ret = atm_send(hsock, atm_transfer))) {
         if (remove(card_file) != 0) {
             ERR("[-] Unable to remove card file: %s", card_file);
         }
         return 63;
+    }
+
+    if (client_ret == 2) {
+        if (remove(card_file) != 0) {
+            ERR("[-] Unable to remove card file: %s", card_file);
+        }
+        return 255;
     }
 
     atm_close(hsock);

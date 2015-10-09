@@ -86,7 +86,8 @@ int atm_send(int hsock, struct transfer *send_transfer)
 
     if (atm_transfer->type != 0) {
         ERR("[-] Error during communication %d\n", atm_transfer->type);
-        goto FAIL;
+        atm_close(hsock);
+        return 2;
     }
 
     print_transfer(send_transfer->type, atm_transfer);

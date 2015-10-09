@@ -116,7 +116,7 @@ uint32_t compare_money(struct money *a, struct money *b) {
     uint32_t dollar_diff;
 
     if ((dollar_diff = a->dollars - b->dollars) == 0) {
-        return (uint_32_t) a->cents - b->cents;
+        return (uint32_t) a->cents - b->cents;
     } else {
         return dollar_diff;
     }
