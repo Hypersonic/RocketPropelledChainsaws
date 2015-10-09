@@ -1,5 +1,6 @@
 #include "transfer.h"
 
+
 int serialize(char *dst, struct transfer *src)
 {
     unsigned cur_size;
@@ -62,6 +63,7 @@ UNUSED int dencrypt(UNUSED char *key, char UNUSED *plain, UNUSED char *enc)
     return 0;
 }
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 void mac_gen(unsigned char* dest, char* ciphr, char* key)
 {
   HMAC_CTX ctx;
