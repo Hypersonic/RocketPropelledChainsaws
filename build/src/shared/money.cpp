@@ -102,7 +102,7 @@ bool subtract_money(struct money *a, struct money b)
 				// Overflow when the carry would be applied
 				return false;
 			} else {
-				a->dollars = (a->dollars + 1) - b.dollars;
+				a->dollars = (a->dollars - 1) - b.dollars;
 				a->cents = (100 + a->cents) - b.cents;
 
 				return true;
@@ -112,9 +112,7 @@ bool subtract_money(struct money *a, struct money b)
     return true;
 }
 
-/* Not 100% needed for this, but nicer. Also this will not work
-   as we are returning a signed int with unsigned subtraction */
-int compare_money(struct money *a, struct money *b) {
+uint32_t compare_money(struct money *a, struct money *b) {
     uint32_t dollar_diff;
 
     if ((dollar_diff = a->dollars - b->dollars) == 0) {
