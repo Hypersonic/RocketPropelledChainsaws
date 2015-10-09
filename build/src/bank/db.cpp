@@ -129,7 +129,7 @@ bool db_nonce_insert(db_t *db, uint32_t key, bool value)
         return false;
     }
 
-    DEBUG("Inserting into nonce DB, key %u: %s\n", key, value.c_str());
+    DEBUG("Inserting into nonce DB: %u\n", key);
     (*db->nonces)[key] = value; /* insert the element */
 
     if (0 != pthread_mutex_unlock(&db->nonce_lock)) {
