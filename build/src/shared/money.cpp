@@ -98,7 +98,7 @@ bool subtract_money(struct money *a, struct money b)
             // Overflow from cents
             return false;
         } else {
-            if ((a->dollars + 1) < b.dollars) {
+            if ((a->dollars - 1) < b.dollars) {
 				// Overflow when the carry would be applied
 				return false;
 			} else {
