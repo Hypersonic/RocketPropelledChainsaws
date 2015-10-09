@@ -10,7 +10,7 @@ BANK_FLAGS := -DBANK
 ATM_FLAGS := -DATM
 CFLAGS =
 ifeq ($(MACHINE), Linux)
-	LIBS = -pthread 
+	LIBS = -pthread -lssl -lcrypto
 else
 	LIBS = -lpthread -lssl -lcrypto
 endif
@@ -48,10 +48,10 @@ $(DIRS):
 	$(MKDIR) $@
 
 $(BANK_BNRY): $(BANK_OBJS)
-	$(CXX) $(FLAGS) -DBANK $(LIBS) $(BANK_OBJS) -o $@
+	$(CXX) $(FLAGS) -DBANK $(BANK_OBJS) -o $@ $(LIBS)
 
 $(ATM_BNRY): $(ATM_OBJS)
-	$(CXX) $(FLAGS) -DATM $(LIBS) $(ATM_OBJS) -o $@
+	$(CXX) $(FLAGS) -DATM $(ATM_OBJS) -o $@ $(LIBS)
 
 $(BANK_OBJS): | $(DIRS)
 
