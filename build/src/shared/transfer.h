@@ -33,7 +33,7 @@ UNUSED int dencrypt(char *key, char *plain, char *enc);
 /* Encrypt then Mac 
  * Returns a mac given a secret key and cipher-text
  */
-unsigned char* mac_gen(char* ciphr, char* key);
+void mac_gen(unsigned char* dest, char* ciphr, char* key);
 
 int print_transfer(char type, struct transfer *t);
 
