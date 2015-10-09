@@ -68,8 +68,8 @@ void *bank_socket_handler(void *lp)
     uint32_t nonce;
     int bytecount, buffer_len, *csock;
     struct transfer *trans;
-    struct money curr_balance;
     struct timeval tv;
+    struct money curr_balance;
 
     char buffer[sizeof(struct transfer)];
     char tmp_nonce[NONCE_SIZE];
@@ -124,6 +124,10 @@ void *bank_socket_handler(void *lp)
 
     switch (trans->type) {
     case 'n': /* new account */
+        if (trans->amt.dollars < 10) {
+            ERR("Deposit money less than 10.00\n");
+            goto SER_FAIL;
+        }
         if (db_contains(db, trans->name)) {
             ERR("User already exists: \"%s\"\n", trans->name);
             goto SER_FAIL;

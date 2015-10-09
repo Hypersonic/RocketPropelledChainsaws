@@ -24,6 +24,6 @@ bool subtract_money(struct money *a, struct money b);
 
 int parse_money(struct money *dst, char *str);
 void print_money(struct money *amt);
-uint32_t compare_money(struct money *a, struct money *b);
+UNUSED int compare_money(struct money *a, struct money *b);
 
 #endif

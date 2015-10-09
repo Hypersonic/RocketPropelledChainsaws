@@ -67,6 +67,12 @@ int atm_main(int argc, char **argv)
         case 'n':
         case 'd':
         case 'w':
+            if (!trans_set) {
+                trans_set = 1;
+            } else {
+                ERR("[-] Command option already specified\n");
+                return 255;
+            }
             atm_transfer->type = c;
             if (!amt_set) {
                 amt_set = 1;
@@ -74,14 +80,24 @@ int atm_main(int argc, char **argv)
                     return 255;
                 }
             } else {
-                ERR("[-] Additional optional command specified");
+                ERR("[-] Additional optional command specified\n");
                 return 255;
             }
-            trans_set = 1;
             break;
         case 'g':
             atm_transfer->type = c;
-            trans_set = 1;
+            if (!trans_set) {
+                trans_set = 1;
+            } else {
+                ERR("[-] Command option already specified\n");
+                return 255;
+            }
+
+            LOG("%s\n", optarg);
+            if (optarg != NULL) {
+                ERR("[-] Cannot specify option for option -g\n");
+                return 255;
+            }
             break;
         case '?':
             if (isprint(optopt)){

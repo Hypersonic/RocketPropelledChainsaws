@@ -49,8 +49,6 @@ int atm_send(int hsock, struct transfer *send_transfer)
     char tmp_nonce[NONCE_SIZE];
     int buffer_len = sizeof(struct transfer);
 
-    serialize(buffer, send_transfer);
-
     if (setsockopt(hsock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
         ERR("[-] Unable to set timeout: %d\n", errno);
         goto FAIL;
@@ -68,7 +66,9 @@ int atm_send(int hsock, struct transfer *send_transfer)
     }
     LOG("[+] Recieved bytes %d\n", bytecount);
 
-    memcpy(&(atm_transfer->nonce), tmp_nonce, NONCE_SIZE);
+    memcpy(&(send_transfer->nonce), tmp_nonce, NONCE_SIZE);
+
+    serialize(buffer, send_transfer);
 
     if ((bytecount = send(hsock, buffer, buffer_len, 0)) == -1) {
         ERR("[-] Error sending data %d\n", errno);
