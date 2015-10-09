@@ -74,7 +74,7 @@ void mac_gen(unsigned char* dest, char* ciphr, char* key)
   HMAC_Init_ex(&ctx,key,strlen(key),EVP_sha256(),NULL);
   HMAC_Update(&ctx,(unsigned char*)&ciphr,strlen(ciphr));
   HMAC_Final(&ctx,dest,&sha256_len);
-  
+
   HMAC_CTX_cleanup(&ctx);
 }
 
@@ -103,11 +103,11 @@ int print_transfer(char type, struct transfer *t)
         return 0;
     }
 
-    printf("{\"%s\":", msg);
-    print_money(&(t->amt));
-    printf(",\"account\":\"");
+    printf("{\"account\":\"");
     print_escaped_string(t->name);
-    printf("\"}\n");
+    printf("\",\"%s\":", msg);
+    print_money(&(t->amt));
+    printf("}\n");
 
     fflush(stdout);
     return 1;

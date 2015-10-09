@@ -30,7 +30,7 @@ int is_valid_name(char *name)
 
 int is_valid_filename(char *filename)
 {
-    if (strcmp(filename, "..") || strcmp(filename, ".")
+    if (!strcmp(filename, "..") || !strcmp(filename, ".")
         || !is_valid_name(filename)) {
         return 0;
     }

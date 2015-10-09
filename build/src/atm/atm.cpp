@@ -24,7 +24,7 @@ int atm_main(int argc, char **argv)
 
     LOG("Hello, ATM!\n");
 
-    while ((c = getopt(argc, argv, "s:i:p:c:a:n:d:w:g")) != -1) {
+    while ((c = getopt(argc, argv, "s:i:p:c:a:n:d:w:g::")) != -1) {
         switch (c) {
         case 's':
             if (!is_valid_filename(optarg)) {
