@@ -6,6 +6,7 @@
 #include "shared/money.h"
 #include "shared/util.h"
 
+
 struct transfer {
     uint8_t type;
     uint32_t nonce;
@@ -29,6 +30,13 @@ UNUSED int encrypt(char *key, char *enc, char *plain);
 
 UNUSED int dencrypt(char *key, char *plain, char *enc);
 
+/* Encrypt then Mac 
+ * Returns a mac given a secret key and cipher-text
+ */
+unsigned char* mac_gen(char* ciphr, char* key);
+
 int print_transfer(char type, struct transfer *t);
+
+
 
 #endif

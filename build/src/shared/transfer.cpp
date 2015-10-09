@@ -62,6 +62,13 @@ UNUSED int dencrypt(UNUSED char *key, char UNUSED *plain, UNUSED char *enc)
     return 0;
 }
 
+unsigned char* mac_gen(char* ciphr, char* key)
+{
+  unsigned char* digest;
+  digest = HMAC(EVP_sha256(),key,strlen(key),(unsigned char*)ciphr,strlen(ciphr),NULL,NULL);
+  return digest;
+}
+
 int print_transfer(char type, struct transfer *t)
 {
     const char *type_message[4] = {"initial_balance", "deposit",
