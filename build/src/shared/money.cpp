@@ -36,6 +36,11 @@ int parse_money(struct money *amt, char *str)
     }
     cents = (uint8_t) parse_cents;
 
+    if (dollars == 0 && cents == 0) {
+        ERR("[-] Cannot do anything with no money\n");
+        return 0;
+    }
+
     amt->dollars = dollars;
     amt->cents = cents;
 
@@ -44,48 +49,26 @@ int parse_money(struct money *amt, char *str)
     return 1;
 }
 
-bool add_money(struct money *a, struct money b)
+void add_money(struct db_money *a, struct money b)
 {
     assert(a->cents < 100);
     assert(b.cents < 100);
 
     if ((a->cents + b.cents) < 100) {
-        if (UINT32_MAX - a->dollars < b.dollars) {
-            // Dollars overflow
-            return false;
-        } else {
-            a->dollars = a->dollars + b.dollars;
-            a->cents = a->cents + b.cents;
-
-            return true;
-        }
+        a->dollars = a->dollars + b.dollars;
+        a->cents = a->cents + b.cents;
     } else {
-        if (a->dollars == UINT32_MAX || b.dollars == UINT32_MAX) {
-            // Overflow when 1 is added in carry
-            return false;
-        } else {
-            if (UINT32_MAX - (a->dollars + 1) < b.dollars) {
-				// Overflow when the carry would be applied
-				return false;
-			} else {
-				a->dollars = (a->dollars + 1) + b.dollars;
-				a->cents = (a->cents + b.cents) % 100;
-
-				return true;
-			}
-		}
+		a->cents = (a->cents + b.cents) % 100;
     }
-    return true;
 }
 
-bool subtract_money(struct money *a, struct money b)
+bool subtract_money(struct db_money *a, struct money b)
 {
     assert(a->cents < 100);
     assert(b.cents < 100);
 
     if (b.cents <= a->cents) {
-        if (a->dollars < b.dollars) {
-            // Dollars overflow
+        if (a->dollars < BigUnsigned(b.dollars)) {
             return false;
         } else {
             a->dollars = a->dollars - b.dollars;
@@ -98,7 +81,7 @@ bool subtract_money(struct money *a, struct money b)
             // Overflow from cents
             return false;
         } else {
-            if ((a->dollars - 1) < b.dollars) {
+            if ((a->dollars - 1) < BigUnsigned(b.dollars)) {
 				// Overflow when the carry would be applied
 				return false;
 			} else {
@@ -110,14 +93,4 @@ bool subtract_money(struct money *a, struct money b)
 		}
     }
     return true;
-}
-
-uint32_t compare_money(struct money *a, struct money *b) {
-    uint32_t dollar_diff;
-
-    if ((dollar_diff = a->dollars - b->dollars) == 0) {
-        return (uint32_t) a->cents - b->cents;
-    } else {
-        return dollar_diff;
-    }
 }

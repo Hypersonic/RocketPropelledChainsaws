@@ -1,7 +1,7 @@
 #ifndef BIGINTEGER_H
 #define BIGINTEGER_H
 
-#include "BigUnsigned.hh"
+#include "BigUnsigned.h"
 
 /* A BigInteger object represents a signed integer of size limited only by
  * available memory.  BigUnsigneds support most mathematical operators and can
@@ -112,7 +112,7 @@ public:
 	 * are involved. */
 	void divideWithRemainder(const BigInteger &b, BigInteger &q);
 	void negate(const BigInteger &a);
-	
+
 	/* Bitwise operators are not provided for BigIntegers.  Use
 	 * getMagnitude to get the magnitude and operate on that instead. */
 
@@ -178,7 +178,7 @@ inline BigInteger BigInteger::operator -() const {
 
 /*
  * ASSIGNMENT OPERATORS
- * 
+ *
  * Now the responsibility for making a temporary copy if necessary
  * belongs to the put-here operations.  See Assignment Operators in
  * BigUnsigned.hh.

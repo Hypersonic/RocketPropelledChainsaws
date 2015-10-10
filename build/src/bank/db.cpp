@@ -21,7 +21,7 @@ db_t *db_create()
         return NULL;
     }
 
-    db->balances = new std::map<std::string, struct money>();
+    db->balances = new std::map<std::string, struct db_money>();
     db->nonces = new std::map<uint32_t, bool>();
 
     return db;
@@ -45,7 +45,7 @@ bool db_destroy(db_t *db)
     return true;
 }
 
-bool db_insert(db_t *db, std::string key, struct money value)
+bool db_insert(db_t *db, std::string key, struct db_money &value)
 {
     assert(db != NULL);
 
@@ -61,7 +61,10 @@ bool db_insert(db_t *db, std::string key, struct money value)
         return false;
     }
 
-    DEBUG("Inserting into DB, key \"%s\": $%u.%d\n", key.c_str(), value.dollars, value.cents);
+    /*
+    UNUSED const char *v1 = bigUnsignedToString(value.dollars).c_str();
+    DEBUG("Inserting into DB, key \"%s\": $%s.%d\n", key.c_str(), v1, value.cents);
+    */
     (*db->balances)[key] = value; /* insert the element */
 
     if (0 != pthread_mutex_unlock(&db->balance_lock)) {
@@ -72,7 +75,7 @@ bool db_insert(db_t *db, std::string key, struct money value)
     return true;
 }
 
-bool db_update(db_t *db, std::string key, struct money value)
+bool db_update(db_t *db, std::string key, struct db_money &value)
 {
     assert(db != NULL);
 
@@ -86,10 +89,13 @@ bool db_update(db_t *db, std::string key, struct money value)
         LOG("DB did not contain key \"%s\", cannot update\n", key.c_str());
         return false;
     }
-
-    DEBUG("Updating DB, key \"%s\": $%u.%d -> $%u.%d\n", key.c_str(), (*db->balances)[key].dollars, (*db->balances)[key].cents, value.dollars, value.cents);
+    /*
+    UNUSED const char *v1 = bigUnsignedToString((*db->balances)[key].dollars).c_str();
+    UNUSED const char *v2 = bigUnsignedToString(value.dollars).c_str();
+    DEBUG("Updating DB, key \"%s\": $%s.%d -> $%s.%d\n", key.c_str(),
+        v1, (*db->balances)[key].cents, v2, value.cents);
+    */
     (*db->balances)[key] = value; /* change the element */
-
     if (0 != pthread_mutex_unlock(&db->balance_lock)) {
         LOG("Could not unlock db\n");
         return false;
@@ -105,7 +111,7 @@ bool db_contains(db_t *db, std::string key)
     return db->balances->end() != db->balances->find(key);
 }
 
-struct money db_get(db_t *db, std::string key)
+struct db_money db_get(db_t *db, std::string key)
 {
     assert(db != NULL);
 

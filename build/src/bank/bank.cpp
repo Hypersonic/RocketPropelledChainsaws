@@ -5,21 +5,6 @@ void signal_handler(RELEASE_UNUSED int signal) {
     exit(0);
 }
 
-/* Test duplicate inserts */
-UNUSED int test_db() {
-    if (!db_insert(db, "asdf", {100, 1})) {
-        return 255;
-    }
-    if (!db_update(db, "asdf", {100, 2})) {
-        return 255;
-    }
-    if (!db_insert(db, "asdf", {100, 3})) {
-        return 255;
-    }
-    db_destroy(db);
-    return 0;
-}
-
 int bank_main(int argc, char **argv)
 {
     char c, *auth_file, *end, *auth_file_contents;

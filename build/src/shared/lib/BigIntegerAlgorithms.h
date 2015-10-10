@@ -1,7 +1,7 @@
 #ifndef BIGINTEGERALGORITHMS_H
 #define BIGINTEGERALGORITHMS_H
 
-#include "BigInteger.hh"
+#include "BigInteger.h"
 
 /* Some mathematical algorithms for big integers.
  * This code is new and, as such, experimental. */

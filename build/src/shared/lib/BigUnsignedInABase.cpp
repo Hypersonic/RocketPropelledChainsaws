@@ -1,7 +1,7 @@
-#include "BigUnsignedInABase.hh"
+#include "BigUnsignedInABase.h"
 
-BigUnsignedInABase::BigUnsignedInABase(const Digit *d, Index l, Base base)
-	: NumberlikeArray<Digit>(d, l), base(base) {
+BigUnsignedInABase::BigUnsignedInABase(const Digit *d, Index l, Base _base)
+	: NumberlikeArray<Digit>(d, l), base(_base) {
 	// Check the base
 	if (base < 2)
 		throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, Index, Base): The base must be at least 2";
@@ -29,11 +29,11 @@ namespace {
 	}
 }
 
-BigUnsignedInABase::BigUnsignedInABase(const BigUnsigned &x, Base base) {
+BigUnsignedInABase::BigUnsignedInABase(const BigUnsigned &x, Base _base) {
 	// Check the base
 	if (base < 2)
 		throw "BigUnsignedInABase(BigUnsigned, Base): The base must be at least 2";
-	this->base = base;
+	this->base = _base;
 
 	// Get an upper bound on how much space we need
 	int maxBitLenOfX = x.getLength() * BigUnsigned::N;
@@ -70,13 +70,13 @@ BigUnsignedInABase::operator BigUnsigned() const {
 	return ans;
 }
 
-BigUnsignedInABase::BigUnsignedInABase(const std::string &s, Base base) {
+BigUnsignedInABase::BigUnsignedInABase(const std::string &s, Base _base) {
 	// Check the base.
 	if (base > 36)
 		throw "BigUnsignedInABase(std::string, Base): The default string conversion routines use the symbol set 0-9, A-Z and therefore support only up to base 36.  You tried a conversion with a base over 36; write your own string conversion routine.";
 	// Save the base.
 	// This pattern is seldom seen in C++, but the analogous ``this.'' is common in Java.
-	this->base = base;
+	this->base = _base;
 
 	// `s.length()' is a `size_t', while `len' is a `NumberlikeArray::Index',
 	// also known as an `unsigned int'.  Some compilers warn without this cast.

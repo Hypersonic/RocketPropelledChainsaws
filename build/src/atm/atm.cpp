@@ -24,7 +24,7 @@ int atm_main(int argc, char **argv)
 
     LOG("Hello, ATM!\n");
 
-    while ((c = getopt(argc, argv, "s:i:p:c:a:n:d:w:g::")) != -1) {
+    while ((c = getopt(argc, argv, "s:i:p:c:a:n:d:w:g")) != -1) {
         switch (c) {
         case 's':
             if (!is_valid_filename(optarg)) {
@@ -93,8 +93,7 @@ int atm_main(int argc, char **argv)
                 return 255;
             }
 
-            LOG("%s\n", optarg);
-            if (optarg != NULL) {
+            if (optind != argc && argv[optind][0] != '-') {
                 ERR("[-] Cannot specify option for option -g\n");
                 return 255;
             }
@@ -168,24 +167,23 @@ int atm_main(int argc, char **argv)
     }
 
     if (!(hsock = atm_connect(host_name, host_port))) {
-        if (remove(card_file) != 0) {
-            ERR("[-] Unable to remove card file: %s", card_file);
+        if (atm_transfer->type == 'n') {
+            if (remove(card_file) != 0) {
+                ERR("[-] Unable to remove card file: %s", card_file);
+            }
         }
         return 255;
     }
 
-    if (!(client_ret = atm_send(hsock, atm_transfer))) {
-        if (remove(card_file) != 0) {
-            ERR("[-] Unable to remove card file: %s", card_file);
+    client_ret = atm_send(hsock, atm_transfer);
+    if (client_ret == 0 || client_ret == 255) {
+        if (atm_transfer->type == 'n') {
+            if (remove(card_file) != 0) {
+                ERR("[-] Unable to remove card file: %s", card_file);
+                return 255;
+            }
         }
-        return 63;
-    }
-
-    if (client_ret == 2) {
-        if (remove(card_file) != 0) {
-            ERR("[-] Unable to remove card file: %s", card_file);
-        }
-        return 255;
+        return client_ret;
     }
 
     atm_close(hsock);

@@ -1,4 +1,4 @@
-#include "BigInteger.hh"
+#include "BigInteger.h"
 
 void BigInteger::operator =(const BigInteger &x) {
 	// Calls like a = a have no effect

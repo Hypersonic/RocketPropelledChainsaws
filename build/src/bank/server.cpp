@@ -69,10 +69,13 @@ void *bank_socket_handler(void *lp)
     int bytecount, buffer_len, *csock;
     struct transfer *trans;
     struct timeval tv;
-    struct money curr_balance;
+    struct db_money curr_balance;
+    struct db_money tmp_money;
+    std::string tmp_cents;
 
     char buffer[sizeof(struct transfer)];
     char tmp_nonce[NONCE_SIZE];
+    std::string big_int;
 
     tv.tv_sec = 10;
     tv.tv_usec = 0;
@@ -112,7 +115,9 @@ void *bank_socket_handler(void *lp)
     if (bytecount != sizeof(struct transfer)
         || !deserialize(trans, buffer)) {
         ERR("Error deserializing transfer struct\n");
-        goto SER_FAIL;
+        puts("protocol_error");
+        fflush(stdout);
+        goto NET_FAIL;
     }
 
     if (!db_nonce_contains(db, trans->nonce)) {
@@ -121,6 +126,10 @@ void *bank_socket_handler(void *lp)
     } else {
         db_nonce_remove(db, trans->nonce);
     }
+
+    /**************************************************/
+    /* TODO: Need to check if name matches up to card */
+    /**************************************************/
 
     switch (trans->type) {
     case 'n': /* new account */
@@ -132,7 +141,9 @@ void *bank_socket_handler(void *lp)
             ERR("User already exists: \"%s\"\n", trans->name);
             goto SER_FAIL;
         }
-        db_insert(db, trans->name, trans->amt);
+        tmp_money.dollars = trans->amt.dollars;
+        tmp_money.cents = trans->amt.cents;
+        db_insert(db, trans->name, tmp_money);
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
         break;
@@ -142,10 +153,7 @@ void *bank_socket_handler(void *lp)
             goto SER_FAIL;
         }
         curr_balance = db_get(db, trans->name);
-        if (!add_money(&curr_balance, trans->amt)) {
-            ERR("Balance would overflow, not adding\n");
-            goto SER_FAIL;
-        }
+        add_money(&curr_balance, trans->amt);
         if (!db_update(db, trans->name, curr_balance)) {
             ERR("Could not update DB with new balance, aborting!\n");
             goto SER_FAIL;
@@ -175,20 +183,34 @@ void *bank_socket_handler(void *lp)
             ERR("No such user: \"%s\"\n", trans->name);
             goto SER_FAIL;
         }
+        tmp_cents = std::to_string(curr_balance.cents);
         curr_balance = db_get(db, trans->name);
-        trans->amt = curr_balance;
-        print_transfer(trans->type, trans);
-        trans->type = 0; /* return code 0 */
+        big_int = bigUnsignedToString(curr_balance.dollars);
+        big_int += "." + (tmp_cents.length() == 1 ? std::string("0") : std::string("")) + tmp_cents;
         break;
     default:  /* Error */
         ERR("Error deserializing transfer struct, unknown option %c\n", trans->type);
         goto SER_FAIL;
     }
-    serialize(buffer, trans);
 
-    if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
-        ERR("Error sending data %d\n", errno);
-        goto NET_FAIL;
+    if (trans->type == 'g') {
+        const char *tmp = big_int.c_str();
+        if((bytecount = send(*csock, tmp, big_int.length(), 0)) == -1){
+            ERR("Error sending data %d\n", errno);
+            goto NET_FAIL;
+        }
+
+        printf("{\"account\":\"");
+        print_escaped_string(trans->name);
+        printf("\",\"balance\":%s}\n", tmp);
+        fflush(stdout);
+    } else {
+        serialize(buffer, trans);
+
+        if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
+            ERR("Error sending data %d\n", errno);
+            goto NET_FAIL;
+        }
     }
 
     DEBUG("Sent bytes %d\n", bytecount);

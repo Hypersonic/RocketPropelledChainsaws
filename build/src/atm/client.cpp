@@ -47,6 +47,7 @@ int atm_send(int hsock, struct transfer *send_transfer)
 
     char buffer[sizeof(struct transfer)];
     char tmp_nonce[NONCE_SIZE];
+    char *big_int = NULL;
     int buffer_len = sizeof(struct transfer);
 
     if (setsockopt(hsock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
@@ -56,7 +57,7 @@ int atm_send(int hsock, struct transfer *send_transfer)
 
     atm_transfer = (struct transfer *) malloc(sizeof(struct transfer));
     if (atm_transfer == NULL) {
-        ERR("[-] Unable to allocate");
+        ERR("[-] Unable to allocate\n");
         goto FAIL;
     }
 
@@ -76,25 +77,66 @@ int atm_send(int hsock, struct transfer *send_transfer)
     }
     LOG("[+] Sent bytes %d\n", bytecount);
 
-    if ((bytecount = recv(hsock, buffer, buffer_len, 0)) == -1) {
-        ERR("[-] Error receiving data %d\n", errno);
-        goto FAIL;
+
+    if (send_transfer->type == 'g') {
+        big_int = (char *) malloc(SECURE_SIZE);
+        if (big_int == NULL) {
+            ERR("[-] Unable to allocate\n");
+            goto FAIL;
+        }
+        bytecount = 0;
+        while (1) {
+            int j = recv(hsock, big_int + bytecount, SECURE_SIZE, 0);
+
+            if (j < 0) {
+                ERR("[-] Error receiving big int\n");
+                free(big_int);
+                goto FAIL;
+            }
+            if (j == 0)
+                break;
+
+            if (j == SECURE_SIZE) {
+                big_int = (char *) realloc(big_int, bytecount += SECURE_SIZE);
+                if (big_int == NULL) {
+                    ERR("[-] Unable to allocate\n");
+                    goto FAIL;
+                }
+            }
+        }
+    } else {
+        if ((bytecount = recv(hsock, buffer, buffer_len, 0)) == -1) {
+            ERR("[-] Error receiving data %d\n", errno);
+            goto FAIL;
+        }
     }
     LOG("[+] Recieved bytes %d\n", bytecount);
 
-    deserialize(atm_transfer, buffer);
+    if (send_transfer->type == 'g') {
+        if (buffer[0] == '\xff') {
+            goto SER_FAIL;
+        }
 
-    if (atm_transfer->type != 0) {
-        ERR("[-] Error during communication %d\n", atm_transfer->type);
-        atm_close(hsock);
-        return 2;
+        printf("{\"account\":\"");
+        print_escaped_string(send_transfer->name);
+        printf("\",\"balance\":%s}\n", big_int);
+        fflush(stdout);
+    } else {
+        deserialize(atm_transfer, buffer);
+        if (atm_transfer->type == 255) {
+            goto SER_FAIL;
+        }
+
+        print_transfer(send_transfer->type, atm_transfer);
     }
-
-    print_transfer(send_transfer->type, atm_transfer);
 
     free(atm_transfer);
     atm_close(hsock);
     return 1;
+SER_FAIL:
+    free(atm_transfer);
+    atm_close(hsock);
+    return 255;
 FAIL:
     atm_close(hsock);
     return 0;

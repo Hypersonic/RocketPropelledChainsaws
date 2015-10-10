@@ -1,7 +1,7 @@
 #ifndef BIGUNSIGNED_H
 #define BIGUNSIGNED_H
 
-#include "NumberlikeArray.hh"
+#include "NumberlikeArray.h"
 
 /* A BigUnsigned object represents a nonnegative integer of size limited only by
  * available memory.  BigUnsigneds support most mathematical operators and can
@@ -20,14 +20,14 @@ public:
 	typedef unsigned long Blk;
 
 	typedef NumberlikeArray<Blk>::Index Index;
-	NumberlikeArray<Blk>::N;
+	using NumberlikeArray<Blk>::N;
 
 protected:
 	// Creates a BigUnsigned with a capacity; for internal use.
 	BigUnsigned(int, Index c) : NumberlikeArray<Blk>(0, c) {}
 
 	// Decreases len to eliminate any leading zero blocks.
-	void zapLeadingZeros() { 
+	void zapLeadingZeros() {
 		while (len > 0 && blk[len - 1] == 0)
 			len--;
 	}
@@ -52,7 +52,7 @@ public:
 
 	// Destructor.  NumberlikeArray does the delete for us.
 	~BigUnsigned() {}
-	
+
 	// Constructors from primitive integer types
 	BigUnsigned(unsigned long  x);
 	BigUnsigned(         long  x);
@@ -84,8 +84,8 @@ public:
 	// BIT/BLOCK ACCESSORS
 
 	// Expose these from NumberlikeArray directly.
-	NumberlikeArray<Blk>::getCapacity;
-	NumberlikeArray<Blk>::getLength;
+	using NumberlikeArray<Blk>::getCapacity;
+	using NumberlikeArray<Blk>::getLength;
 
 	/* Returns the requested block, or 0 if it is beyond the length (as if
 	 * the number had 0s infinitely to the left). */
@@ -157,7 +157,7 @@ public:
 	 * object in which to store the quotient.  NOTE: If you are wondering
 	 * why these don't return a value, you probably mean to use the
 	 * overloaded return-by-value operators instead.
-	 * 
+	 *
 	 * Examples:
 	 *     BigInteger a(43), b(7), c, d;
 	 *
@@ -169,7 +169,7 @@ public:
 	 *
 	 *     // ``Aliased'' calls now do the right thing using a temporary
 	 *     // copy, but see note on `divideWithRemainder'.
-	 *     a.add(a, b); 
+	 *     a.add(a, b);
 	 */
 
 	// COPY-LESS OPERATIONS
