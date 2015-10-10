@@ -1,6 +1,6 @@
 #include "bank.h"
 
-void signal_handler(int signal) {
+void signal_handler(RELEASE_UNUSED int signal) {
     LOG("[*] Exiting server with signal: %d\n", signal);
     exit(0);
 }
