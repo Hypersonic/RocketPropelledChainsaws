@@ -81,3 +81,15 @@ ssize_t secure_recv(int sockfd, void* buf, unsigned char* key,
     return status ? len : -1;
 }
 
+AES_RNG* init_iv_gen(unsigned char* iv) {
+    return new AES_RNG(iv, IV_SIZE);
+}
+
+int get_next_iv(AES_RNG* prng, unsigned char* iv) {
+    prng->GenerateBlock(iv, IV_SIZE);
+    return 0;
+}
+
+void free_iv_gen(AES_RNG* prng) {
+    free(prng);
+}

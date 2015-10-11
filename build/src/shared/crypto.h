@@ -3,6 +3,7 @@
 
 #include "shared/macros.h"
 #include "shared/util.h"
+#include "shared/AES_RNG.h"
 #include <sys/socket.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/gcm.h>
@@ -22,5 +23,11 @@ ssize_t secure_send(int sockfd, const void* buf, size_t len,
 
 ssize_t secure_recv(int sockfd, void* buf, unsigned char* key,
 		    unsigned char* iv);
+
+AES_RNG* init_iv_gen(unsigned char* iv);
+
+int get_next_iv(AES_RNG* prng, unsigned char* iv);
+
+void free_iv_gen(AES_RNG* prng);
 
 #endif
