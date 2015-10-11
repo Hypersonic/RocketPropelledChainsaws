@@ -50,7 +50,7 @@ void print_escaped_string(char *str)
 
 int random_bytes(char* buf, size_t len)
 {
-    int random_data = open("/dev/random", O_RDONLY);
+    int random_data = open("/dev/urandom", O_RDONLY);
     size_t random_data_read = 0;
     while (random_data_read < len) {
         ssize_t result = read(random_data, buf + random_data_read, len - random_data_read);
