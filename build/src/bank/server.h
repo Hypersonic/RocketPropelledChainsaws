@@ -16,6 +16,7 @@
 
 #include "shared/macros.h"
 #include "shared/config.h"
+#include "shared/crypto.h"
 #include "shared/transfer.h"
 #include "shared/lib/BigIntegerUtils.h"
 #include "bank/db.h"

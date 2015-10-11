@@ -5,7 +5,7 @@
 #include <string>
 #include "shared/money.h"
 #include "shared/util.h"
-
+#include "shared/crypto.h"
 
 struct transfer {
     uint8_t type;
@@ -33,7 +33,7 @@ UNUSED int dencrypt(char *key, char *plain, char *enc);
 /* Encrypt then Mac 
  * Returns a mac given a secret key and cipher-text
  */
-void mac_gen(unsigned char* dest, char* ciphr, char* key);
+UNUSED void mac_gen(unsigned char* dest, char* ciphr, char* key);
 
 int print_transfer(char type, struct transfer *t);
 
