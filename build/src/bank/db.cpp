@@ -42,6 +42,8 @@ bool db_destroy(db_t *db)
     delete db->balances;
     delete db->nonces;
 
+    free(db);
+
     return true;
 }
 
