@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "shared/macros.h"
 #include "shared/config.h"
