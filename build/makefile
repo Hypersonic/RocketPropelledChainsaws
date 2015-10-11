@@ -10,9 +10,9 @@ BANK_FLAGS := -DBANK
 ATM_FLAGS := -DATM
 CFLAGS =
 ifeq ($(MACHINE), Linux)
-	LIBS = -pthread -lssl -lcrypto
+	LIBS = -pthread -lssl -lcryptopp
 else
-	LIBS = -lpthread -lssl -lcrypto
+	LIBS = -lpthread -lssl -lcryptopp
 endif
 MKDIR  = mkdir -p
 RM     = rm -rf

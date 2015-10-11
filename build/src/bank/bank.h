@@ -7,8 +7,6 @@
 
 struct bank_client {
     int *socket;
-    EVP_CIPHER_CTX enc;
-    EVP_CIPHER_CTX dec;
 };
 
 int bank_main(int argc, char **argv);

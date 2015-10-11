@@ -63,21 +63,6 @@ UNUSED int dencrypt(UNUSED char *key, char UNUSED *plain, UNUSED char *enc)
     return 0;
 }
 
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-void mac_gen(unsigned char* dest, char* ciphr, char* key)
-{
-  HMAC_CTX ctx;
-  unsigned int sha256_len = 32;
-
-  HMAC_CTX_init(&ctx);
-
-  HMAC_Init_ex(&ctx,key,strlen(key),EVP_sha256(),NULL);
-  HMAC_Update(&ctx,(unsigned char*)&ciphr,strlen(ciphr));
-  HMAC_Final(&ctx,dest,&sha256_len);
-
-  HMAC_CTX_cleanup(&ctx);
-}
-
 int print_transfer(char type, struct transfer *t)
 {
     const char *type_message[4] = {"initial_balance", "deposit",
