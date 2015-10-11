@@ -26,6 +26,6 @@ unsigned get_file_size(const char * file_name);
 int read_from_file(char *dst, unsigned read_size, char *file_name);
 int write_to_file(char *src, unsigned write_size, char *file_name);
 
-void* recv_var_bytes(int sock);
+void* recv_var_bytes(int sock, int *len);
 
 #endif

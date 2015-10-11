@@ -147,10 +147,11 @@ int write_to_file(char *src, unsigned write_size, char *file_name)
 
 /*
   reads an unknown variable amount of bytes from sock. returns a void pointer 
-  to heap allocated data. should be casted to appropriate type on return.
-  returns NULL on any error
+  to heap allocated data (should be casted to appropriate type on return).
+  stores final buffer length in len.
+  returns NULL on any error.
 */
-void* recv_var_bytes(int sock) {
+void* recv_var_bytes(int sock, int *len) {
 
     int bytecount;
     void* buf = malloc(SECURE_SIZE);
@@ -188,5 +189,6 @@ void* recv_var_bytes(int sock) {
 	    continue;
 	}
     }
+    *len = bytecount;
     return buf;
 }

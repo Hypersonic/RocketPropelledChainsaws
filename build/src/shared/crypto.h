@@ -2,6 +2,8 @@
 #define CRYPTO_H
 
 #include "shared/macros.h"
+#include "shared/util.h"
+#include <sys/socket.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/gcm.h>
 
@@ -11,7 +13,14 @@
 
 int encrypt(char* plain, int plen, char* cipher, unsigned char* key, 
 	    unsigned char* iv);
+
 int decrypt(char* cipher, int clen, char* plain, unsigned char* key, 
 	    unsigned char* iv);
+
+ssize_t secure_send(int sockfd, const void* buf, size_t len,
+		    unsigned char* key, unsigned char* iv);
+
+ssize_t secure_recv(int sockfd, void* buf, unsigned char* key,
+		    unsigned char* iv);
 
 #endif

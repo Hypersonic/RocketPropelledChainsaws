@@ -52,3 +52,32 @@ int decrypt(char* cipher, int clen, char* plain, unsigned char* key,
 	return 0;
     }
 }
+
+
+ssize_t secure_send(int sockfd, const void* buf, size_t len,
+		    unsigned char* key, unsigned char* iv) {
+    int enc_len = len + TAG_SIZE;
+    char enc[enc_len];
+    encrypt((char *)buf, len, enc, key, iv);
+    return send(sockfd, enc, enc_len, 0);
+}
+
+
+ssize_t secure_recv(int sockfd, void* buf, unsigned char* key, 
+		    unsigned char* iv) {
+    int len, enc_len, status;
+    char *enc = (char *)recv_var_bytes(sockfd, &enc_len);
+    if(enc == NULL) {
+	/* if there is an error recv_var_bytes will report it for us */
+	return -1;
+    }
+    len = enc_len - TAG_SIZE;
+    char *rec = (char *)malloc(len);
+    if(rec == NULL) {
+	ERR("[-] Unable to allocate\n");
+	return -1;
+    }
+    status = decrypt((char *)buf, enc_len, rec, key, iv);
+    return status ? len : -1;
+}
+
