@@ -176,7 +176,7 @@ int atm_main(int argc, char **argv)
     }
 
     client_ret = atm_send(hsock, atm_transfer);
-    if (client_ret == 0 || client_ret == 255) {
+    if (client_ret == 63 || client_ret == 255) {
         if (atm_transfer->type == 'n') {
             if (remove(card_file) != 0) {
                 ERR("[-] Unable to remove card file: %s", card_file);

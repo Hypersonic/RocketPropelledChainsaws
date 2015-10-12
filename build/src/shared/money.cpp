@@ -58,6 +58,7 @@ void add_money(struct db_money *a, struct money b)
         a->dollars = a->dollars + b.dollars;
         a->cents = a->cents + b.cents;
     } else {
+        a->dollars = a->dollars + b.dollars + 1;
 		a->cents = (a->cents + b.cents) % 100;
     }
 }
