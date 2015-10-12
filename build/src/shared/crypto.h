@@ -7,6 +7,11 @@
 #include <sys/socket.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/gcm.h>
+#if defined BANK
+#include "bank/server.h" /* need db access if in bank binary */
+#include "bank/db.h"
+#endif
+
 
 #define TAG_SIZE 16 /* CryptoPP::GCM::GCM_Base.DigestSize() */
 #define KEY_SIZE CryptoPP::AES::MAX_KEYLENGTH /* 32 bytes = 256 bits */

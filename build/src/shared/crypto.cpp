@@ -87,6 +87,10 @@ AES_RNG* init_iv_gen(unsigned char* iv) {
 
 int get_next_iv(AES_RNG* prng, unsigned char* iv) {
     prng->GenerateBlock(iv, IV_SIZE);
+    #if defined BANK
+    //    if(db_nonce_contains(db, 
+
+    #endif
     return 0;
 }
 
