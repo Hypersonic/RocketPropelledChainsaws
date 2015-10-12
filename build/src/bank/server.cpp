@@ -96,7 +96,7 @@ void *bank_socket_handler(void *lp)
     } while (db_nonce_contains(db, nonce));
 
     /* insert into DB */
-    db_nonce_insert(db, (unsigned char*)nonce, true);
+    db_nonce_insert(db, (unsigned char *) nonce, true);
 
     if((bytecount = send(*csock, nonce, NONCE_SIZE, 0)) == -1){
         ERR("Error sending data %d\n", errno);
@@ -122,7 +122,7 @@ void *bank_socket_handler(void *lp)
         goto NET_FAIL;
     }
 
-    if (!db_nonce_contains(db, trans->nonce)) {
+    if (!db_nonce_contains(db, (unsigned char *) trans->nonce)) {
         ERR("Nonce mismatch, aborting!\n");
         goto SER_FAIL;
     } else {

@@ -133,11 +133,11 @@ bool db_nonce_insert(db_t *db, std::string key, bool value)
 
     /* if the db contains the key, we return an error */
     if (db->nonces->end() != db->nonces->find(key)) {
-        LOG("nonces DB contained key %u already, cannot insert\n", key);
+        LOG("nonces DB contained key %s already, cannot insert\n", key.c_str());
         return false;
     }
 
-    DEBUG("Inserting into nonce DB: %u\n", key);
+    DEBUG("Inserting into nonce DB: %s\n", key.c_str());
     (*db->nonces)[key] = value; /* insert the element */
 
     if (0 != pthread_mutex_unlock(&db->nonce_lock)) {
@@ -168,7 +168,7 @@ bool db_nonce_remove(db_t *db, std::string key)
 
     auto loc = db->nonces->find(key);
     if (db->nonces->end() == loc) {
-        LOG("Could not find nonce in DB: %u\n", key);
+        LOG("Could not find nonce in DB: %s\n", key.c_str());
         return false;
     }
     db->nonces->erase(loc);
@@ -176,11 +176,11 @@ bool db_nonce_remove(db_t *db, std::string key)
 }
 
 /* nonce ops overloaded to take usigned char* */
-bool db_nonce_insert(db_t *db, unsigned char* keyp, bool value)
+bool db_nonce_insert(db_t *db, unsigned char *keyp, bool value)
 {
     assert(db != NULL);
-    
-    std::string key((char*)keyp, NONCE_SIZE);
+
+    std::string key((char *) keyp, NONCE_SIZE);
 
     if (0 != pthread_mutex_lock(&db->nonce_lock)) {
         LOG("Could not lock nonce db\n");
@@ -189,11 +189,11 @@ bool db_nonce_insert(db_t *db, unsigned char* keyp, bool value)
 
     /* if the db contains the key, we return an error */
     if (db->nonces->end() != db->nonces->find(key)) {
-        LOG("nonces DB contained key %u already, cannot insert\n", key);
+        LOG("nonces DB contained key %s already, cannot insert\n", key.c_str());
         return false;
     }
 
-    DEBUG("Inserting into nonce DB: %u\n", key);
+    DEBUG("Inserting into nonce DB: %s\n", key.c_str());
     (*db->nonces)[key] = value; /* insert the element */
 
     if (0 != pthread_mutex_unlock(&db->nonce_lock)) {
@@ -204,16 +204,16 @@ bool db_nonce_insert(db_t *db, unsigned char* keyp, bool value)
     return true;
 }
 
-bool db_nonce_contains(db_t *db, unsigned char* keyp)
+bool db_nonce_contains(db_t *db, unsigned char *keyp)
 {
     assert(db != NULL);
-    
+
     std::string key((char*) keyp, NONCE_SIZE);
 
     return db->nonces->end() != db->nonces->find(key);
 }
 
-bool db_nonce_get(db_t *db, unsigned char* keyp)
+bool db_nonce_get(db_t *db, unsigned char *keyp)
 {
     assert(db != NULL);
 
@@ -222,7 +222,7 @@ bool db_nonce_get(db_t *db, unsigned char* keyp)
     return (*db->nonces)[key];
 
 }
-bool db_nonce_remove(db_t *db, unsigned char* keyp)
+bool db_nonce_remove(db_t *db, unsigned char *keyp)
 {
     assert(db != NULL);
 
@@ -230,7 +230,7 @@ bool db_nonce_remove(db_t *db, unsigned char* keyp)
 
     auto loc = db->nonces->find(key);
     if (db->nonces->end() == loc) {
-        LOG("Could not find nonce in DB: %u\n", key);
+        LOG("Could not find nonce in DB: %s\n", key.c_str());
         return false;
     }
     db->nonces->erase(loc);
