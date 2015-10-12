@@ -54,6 +54,10 @@ int atm_send(int hsock, struct transfer *send_transfer)
         ERR("[-] Unable to set timeout: %d\n", errno);
         goto FAIL;
     }
+    if (setsockopt(hsock, SOL_SOCKET, SO_SNDTIMEO, (char *) &tv, sizeof tv)) {
+        ERR("[-] Unable to set timeout: %d\n", errno);
+        goto FAIL;
+    }
 
     atm_transfer = (struct transfer *) malloc(sizeof(struct transfer));
     if (atm_transfer == NULL) {
@@ -92,15 +96,17 @@ int atm_send(int hsock, struct transfer *send_transfer)
                 ERR("[-] Error receiving big int\n");
                 free(big_int);
                 goto FAIL;
-            }
-            if (j == 0)
+            } else if (j == 0) {
                 break;
-
-            if (j == SECURE_SIZE) {
-                big_int = (char *) realloc(big_int, bytecount += SECURE_SIZE);
-                if (big_int == NULL) {
-                    ERR("[-] Unable to allocate\n");
-                    goto FAIL;
+            } else if (j > 0) {
+                bytecount += j;
+                if (j == SECURE_SIZE) {
+                    big_int = (char *) realloc(big_int, bytecount);
+                    if (big_int == NULL) {
+                        ERR("[-] Unable to allocate\n");
+                        free(big_int);
+                        goto FAIL;
+                    }
                 }
             }
         }

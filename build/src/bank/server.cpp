@@ -86,6 +86,10 @@ void *bank_socket_handler(void *lp)
         ERR("[-] Unable to set timeout: %d\n", errno);
         return NULL;
     }
+    if (setsockopt(*csock, SOL_SOCKET, SO_SNDTIMEO, (char *) &tv, sizeof tv)) {
+        ERR("[-] Unable to set timeout: %d\n", errno);
+        return NULL;
+    }
 
     /* Generate a unique nonce */
     do {
@@ -183,8 +187,8 @@ void *bank_socket_handler(void *lp)
             ERR("No such user: \"%s\"\n", trans->name);
             goto SER_FAIL;
         }
-        tmp_cents = std::to_string(curr_balance.cents);
         curr_balance = db_get(db, trans->name);
+        tmp_cents = std::to_string(curr_balance.cents);
         big_int = bigUnsignedToString(curr_balance.dollars);
         big_int += "." + (tmp_cents.length() == 1 ? std::string("0") : std::string("")) + tmp_cents;
         break;
