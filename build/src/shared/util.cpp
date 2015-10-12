@@ -48,19 +48,28 @@ void print_escaped_string(char *str)
     }
 }
 
+size_t rand_pool_pos = RAND_POOL_SIZE; // Initialize high so first call of random_bytes initializes the pool
+char rand_pool[RAND_POOL_SIZE];
+
 int random_bytes(char* buf, size_t len)
 {
-    int random_data = open("/dev/urandom", O_RDONLY);
-    size_t random_data_read = 0;
-    while (random_data_read < len) {
-        ssize_t result = read(random_data, buf + random_data_read, len - random_data_read);
-        if (result < 0) {
-            ERR("Unable to generate random numbers: %d\n", errno);
-            return 0;
+    if (rand_pool_pos + len >= RAND_POOL_SIZE) {
+        LOG("Refilling random pool!\n");
+        int random_data = open("/dev/urandom", O_RDONLY);
+        size_t random_data_read = 0;
+        while (random_data_read < len) {
+            ssize_t result = read(random_data, rand_pool + random_data_read, RAND_POOL_SIZE - random_data_read);
+            if (result < 0) {
+                ERR("Unable to generate random numbers: %d\n", errno);
+                return 0;
+            }
+            random_data_read += result;
         }
-        random_data_read += result;
+        close(random_data);
+        rand_pool_pos = 0;
     }
-    close(random_data);
+    memcpy(buf, rand_pool + rand_pool_pos, len);
+    rand_pool_pos += len;
     return 1;
 }
 

@@ -16,6 +16,8 @@
 #include "shared/macros.h"
 #include "shared/config.h"
 
+#define RAND_POOL_SIZE (1 << 16)
+
 int is_valid_name(char *name);
 int is_valid_filename(char *filename);
 
