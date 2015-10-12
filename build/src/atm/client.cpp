@@ -145,7 +145,7 @@ SER_FAIL:
     return 255;
 FAIL:
     atm_close(hsock);
-    return 0;
+    return 63;
 }
 
 void atm_close(int hsock)
