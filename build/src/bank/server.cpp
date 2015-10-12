@@ -65,7 +65,7 @@ int bank_create_server(int host_port)
 
 void *bank_socket_handler(void *lp)
 {
-    uint32_t nonce;
+    char nonce[NONCE_SIZE];
     int bytecount, buffer_len, *csock;
     struct transfer *trans;
     struct timeval tv;
@@ -74,7 +74,6 @@ void *bank_socket_handler(void *lp)
     std::string tmp_cents;
 
     char buffer[sizeof(struct transfer)];
-    char tmp_nonce[NONCE_SIZE];
     std::string big_int;
 
     tv.tv_sec = 10;
@@ -93,14 +92,13 @@ void *bank_socket_handler(void *lp)
 
     /* Generate a unique nonce */
     do {
-        random_bytes(tmp_nonce, NONCE_SIZE);
-        memcpy(&nonce, tmp_nonce, NONCE_SIZE);
+        random_bytes(nonce, NONCE_SIZE);
     } while (db_nonce_contains(db, nonce));
 
     /* insert into DB */
-    db_nonce_insert(db, nonce, true);
+    db_nonce_insert(db, (unsigned char*)nonce, true);
 
-    if((bytecount = send(*csock, tmp_nonce, NONCE_SIZE, 0)) == -1){
+    if((bytecount = send(*csock, nonce, NONCE_SIZE, 0)) == -1){
         ERR("Error sending data %d\n", errno);
         goto NET_FAIL;
     }

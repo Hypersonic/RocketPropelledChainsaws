@@ -1,6 +1,7 @@
 #ifndef DB_H
 #define DB_H
 #include "shared/macros.h"
+#include "shared/config.h"
 #include "shared/money.h"
 #include <stdlib.h>
 #include <stdint.h>
@@ -13,7 +14,7 @@ typedef struct db_s {
     pthread_mutex_t balance_lock;
     std::map<std::string, struct db_money> *balances;
     pthread_mutex_t nonce_lock;
-    std::map<uint32_t, bool> *nonces;
+    std::map<std::string, bool> *nonces;
 } db_t;
 
 /* Create a new DB.
@@ -59,11 +60,11 @@ struct db_money db_get(db_t *db, std::string key);
  *
  * Returns whether the operation was a success
  * */
-bool db_nonce_insert(db_t *db, uint32_t key, bool value);
+bool db_nonce_insert(db_t *db, std::string key, bool value);
 
 /* Return whether a db contains a given key
  */
-bool db_nonce_contains(db_t *db, uint32_t key);
+bool db_nonce_contains(db_t *db, std::string key);
 
 /* Retrieve a name associated with a key from the nonce db.
  *
@@ -72,11 +73,20 @@ bool db_nonce_contains(db_t *db, uint32_t key);
  *
  * Returns the user associated with the key.
  */
-bool db_nonce_get(db_t *db, uint32_t key);
+bool db_nonce_get(db_t *db, std::string key);
 
 /* Remove a key from the DB.
  * returns whether the op was a success
  */
-bool db_nonce_remove(db_t *db, uint32_t key);
+bool db_nonce_remove(db_t *db, std::string key);
+
+/* nonce ops overloaded to take usigned char* */
+bool db_nonce_insert(db_t *db, unsigned char* keyp, bool value);
+
+bool db_nonce_contains(db_t *db, unsigned char* keyp);
+
+bool db_nonce_get(db_t *db, unsigned char* keyp);
+
+bool db_nonce_remove(db_t *db, unsigned char* keyp);
 
 #endif

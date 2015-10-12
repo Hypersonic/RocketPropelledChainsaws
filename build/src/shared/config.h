@@ -3,6 +3,6 @@
 
 #define BANK_PORT 3000
 #define SECURE_SIZE 256
-#define NONCE_SIZE 4
+#define NONCE_SIZE 12
 
 #endif

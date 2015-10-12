@@ -87,10 +87,12 @@ AES_RNG* init_iv_gen(unsigned char* iv) {
 int get_next_iv(AES_RNG* prng, unsigned char* iv) {
     prng->GenerateBlock(iv, IV_SIZE);
     #if defined BANK
-    //    if(db_nonce_contains(db, 
-
+    if(!db_nonce_insert(db, iv, true)) {
+	ERR("[-] PRNG Generated nonce exists. What are the chances?\n");
+	return 0;
+    }			 
     #endif
-    return 0;
+    return 1;
 }
 
 void free_iv_gen(AES_RNG* prng) {

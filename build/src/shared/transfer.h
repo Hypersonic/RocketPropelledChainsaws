@@ -6,10 +6,11 @@
 #include "shared/money.h"
 #include "shared/util.h"
 #include "shared/crypto.h"
+#include "shared/config.h"
 
 struct transfer {
     uint8_t type;
-    uint32_t nonce;
+    char nonce[NONCE_SIZE];
     char name[251];
     struct money amt;
     char card_file[256];
