@@ -38,7 +38,7 @@ int atm_main(int argc, char **argv)
             break;
         case 'p':
             host_port = (int) strtol(optarg, &end, 10);
-            if (*end) {
+            if (optarg[0] == '0' || *end) {
                 ERR("[-] Unable to parse host port: %s", end);
                 return 255;
             }
