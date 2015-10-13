@@ -120,6 +120,7 @@ void *bank_socket_handler(void *lp)
         goto NET_FAIL;
     }
     DEBUG("Recieved encrypted data; Length %d\n",bytecount);
+    DEBUG("Buffer Length %d\n",buffer_len);
     
     fd = open(auth_file,O_RDONLY);
     if(!fd){
@@ -130,10 +131,8 @@ void *bank_socket_handler(void *lp)
         ERR("Failed to read correctly from auth file\n");
     }
     
-    if(!decrypt(c_txt, buffer_len, buffer, key, (unsigned char*) nonce)){
-        ERR("Failed to decrypt user message\n");
-        goto NET_FAIL;
-    }
+    decrypt(c_txt, buffer_len, buffer, key, (unsigned char*) nonce);
+    
 
     if (NULL == (trans = (struct transfer *) malloc(sizeof(struct transfer)))) {
         ERR("Error allocating transfer struct\n");
