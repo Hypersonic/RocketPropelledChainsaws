@@ -19,8 +19,8 @@ int bank_create_server(int host_port)
     p_int = (int *) malloc(sizeof(int));
     *p_int = 1;
 
-    if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 ) ||
-        (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
+    if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char *)p_int, sizeof(int)) == -1 ) ||
+        (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char *)p_int, sizeof(int)) == -1 ) ){
         ERR("[-] Error setting options %d\n", errno);
         free(p_int);
         return 0;
@@ -66,12 +66,15 @@ int bank_create_server(int host_port)
 void *bank_socket_handler(void *lp)
 {
     char nonce[NONCE_SIZE];
-    int bytecount, buffer_len, *csock;
+    int bytecount, buffer_len, *csock, i;
     struct transfer *trans;
     struct timeval tv;
     struct db_money curr_balance;
     struct db_money tmp_money;
     std::string tmp_cents;
+    BigUnsigned tmp_big;
+
+    const char *db_card, *trans_card;
 
     char buffer[sizeof(struct transfer)];
     std::string big_int;
@@ -96,7 +99,7 @@ void *bank_socket_handler(void *lp)
     } while (db_nonce_contains(db, nonce));
 
     /* insert into DB */
-    db_nonce_insert(db, (unsigned char *) nonce, true);
+    db_nonce_insert(db, nonce, true);
 
     if((bytecount = send(*csock, nonce, NONCE_SIZE, 0)) == -1){
         ERR("Error sending data %d\n", errno);
@@ -122,23 +125,34 @@ void *bank_socket_handler(void *lp)
         goto NET_FAIL;
     }
 
-    if (!db_nonce_contains(db, (unsigned char *) trans->nonce)) {
+    if (!db_nonce_contains(db, trans->nonce)) {
         ERR("Nonce mismatch, aborting!\n");
         goto SER_FAIL;
     } else {
         db_nonce_remove(db, trans->nonce);
     }
 
-    /**************************************************/
-    /* TODO: Need to check if name matches up to card */
-    /**************************************************/
+    if (db_card_contains(db, trans->name)) {
+        db_card = db_card_get(db, trans->name).c_str();
+        trans_card = trans->card;
+
+        i = 0;
+        while (i < CARD_SIZE) {
+            if (db_card[i] != trans_card[i]) break;
+            i++;
+        }
+        if (i != CARD_SIZE) {
+            ERR("Card mismatch, aborting!\n");
+            goto SER_FAIL;
+        }
+    } else {
+        if (!db_card_insert(db, trans->name, trans->card)) {
+            goto SER_FAIL;
+        }
+    }
 
     switch (trans->type) {
     case 'n': /* new account */
-        if (trans->amt.dollars < 10) {
-            ERR("Deposit money less than 10.00\n");
-            goto SER_FAIL;
-        }
         if (db_contains(db, trans->name)) {
             ERR("User already exists: \"%s\"\n", trans->name);
             goto SER_FAIL;
@@ -187,7 +201,8 @@ void *bank_socket_handler(void *lp)
         }
         curr_balance = db_get(db, trans->name);
         tmp_cents = std::to_string(curr_balance.cents);
-        big_int = bigUnsignedToString(curr_balance.dollars);
+        tmp_big = curr_balance.dollars;
+        big_int = bigUnsignedToString(tmp_big);
         big_int += "." + (tmp_cents.length() == 1 ? std::string("0") : std::string("")) + tmp_cents;
         break;
     default:  /* Error */
@@ -226,6 +241,7 @@ SER_FAIL:
     if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
         ERR("Error sending data %d\n", errno);
     }
+    free(trans);
     server_close(csock);
     return NULL;
 NET_FAIL:

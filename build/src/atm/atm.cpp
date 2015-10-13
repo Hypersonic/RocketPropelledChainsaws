@@ -151,17 +151,21 @@ int atm_main(int argc, char **argv)
     }
 
     if (atm_transfer->type == 'n') {
-        if(access(card_file, F_OK) != -1) {
+        if (atm_transfer->amt.dollars < 10) {
+            ERR("[-] Must deposit 10 or more dollars\n");
+            return 255;
+        }
+        if (access(card_file, F_OK) != -1) {
             ERR("[-] Card already exists, you may not create another account with this card\n");
             return 255;
         } else {
-            random_bytes(atm_transfer->card_file, SECURE_SIZE);
-            if (!write_to_file(atm_transfer->card_file, SECURE_SIZE, card_file)) {
+            random_bytes(atm_transfer->card, CARD_SIZE);
+            if (!write_to_file(atm_transfer->card, CARD_SIZE, card_file)) {
                 return 255;
             }
         }
     } else {
-        if (!read_from_file(atm_transfer->card_file, SECURE_SIZE, card_file)) {
+        if (!read_from_file(atm_transfer->card, CARD_SIZE, card_file)) {
             return 255;
         }
     }

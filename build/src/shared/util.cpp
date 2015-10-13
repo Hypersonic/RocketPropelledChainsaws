@@ -155,7 +155,7 @@ int write_to_file(char *src, unsigned write_size, char *file_name)
 }
 
 /*
-  reads an unknown variable amount of bytes from sock. returns a void pointer 
+  reads an unknown variable amount of bytes from sock. returns a void pointer
   to heap allocated data (should be casted to appropriate type on return).
   stores final buffer length in len.
   returns NULL on any error.
@@ -169,10 +169,10 @@ void* recv_var_bytes(int sock, int *len) {
 	ERR("[-] Unable to allocate\n");
 	return NULL;
     }
-    
+
     bytecount = 0;
     while (1) {
-	int j = recv(sock, (unsigned char*)buf + bytecount, SECURE_SIZE, 0);
+	int j = recv(sock, (unsigned char *) buf + bytecount, SECURE_SIZE, 0);
 
 	if (j < 0) {
 	    ERR("[-] Error receiving data\n");
@@ -181,7 +181,7 @@ void* recv_var_bytes(int sock, int *len) {
 	}
 	if (j == 0)
 	    break;
-	
+
 	if (j < SECURE_SIZE) {
 	    bytecount += j;
 	    continue;

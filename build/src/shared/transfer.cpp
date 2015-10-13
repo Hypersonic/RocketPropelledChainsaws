@@ -23,7 +23,7 @@ int serialize(char *dst, struct transfer *src)
     memcpy(dst + cur_size, &(src->amt.cents), sizeof(src->amt.cents));
     cur_size += sizeof(src->amt.cents);
 
-    memcpy(dst + cur_size, src->card_file, sizeof(src->card_file));
+    memcpy(dst + cur_size, src->card, sizeof(src->card));
     return 1;
 }
 
@@ -48,19 +48,8 @@ int deserialize(struct transfer *dst, char *src)
     memcpy(&(dst->amt.cents), src + cur_size, sizeof(dst->amt.cents));
     cur_size += sizeof(dst->amt.cents);
 
-    memcpy(dst->card_file, src + cur_size, sizeof(dst->card_file));
+    memcpy(dst->card, src + cur_size, sizeof(dst->card));
     return 1;
-}
-
-UNUSED int encrypt(UNUSED char *key, UNUSED char *enc, UNUSED char *plain)
-{
-    return 0;
-}
-
-
-UNUSED int dencrypt(UNUSED char *key, char UNUSED *plain, UNUSED char *enc)
-{
-    return 0;
 }
 
 int print_transfer(char type, struct transfer *t)

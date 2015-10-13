@@ -11,9 +11,9 @@
 struct transfer {
     uint8_t type;
     char nonce[NONCE_SIZE];
-    char name[251];
+    char name[NAME_SIZE];
     struct money amt;
-    char card_file[256];
+    char card[CARD_SIZE];
 };
 
 /* Serializes a transfer struct into a char pointer to be transferred
@@ -27,17 +27,11 @@ int serialize(char *dst, struct transfer *src);
  */
 int deserialize(struct transfer *dst, char *src);
 
-UNUSED int encrypt(char *key, char *enc, char *plain);
-
-UNUSED int dencrypt(char *key, char *plain, char *enc);
-
-/* Encrypt then Mac 
+/* Encrypt then Mac
  * Returns a mac given a secret key and cipher-text
  */
 UNUSED void mac_gen(unsigned char* dest, char* ciphr, char* key);
 
 int print_transfer(char type, struct transfer *t);
-
-
 
 #endif

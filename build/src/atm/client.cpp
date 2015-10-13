@@ -21,7 +21,7 @@ int atm_connect(char *host_name, int host_port)
     }
     free(p_int);
 
-    my_addr.sin_family = AF_INET ;
+    my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(host_port);
 
     memset(&(my_addr.sin_zero), 0, 8);
@@ -81,7 +81,6 @@ int atm_send(int hsock, struct transfer *send_transfer)
     }
     LOG("[+] Sent bytes %d\n", bytecount);
 
-
     if (send_transfer->type == 'g') {
         big_int = (char *) malloc(SECURE_SIZE);
         if (big_int == NULL) {
@@ -119,7 +118,7 @@ int atm_send(int hsock, struct transfer *send_transfer)
     LOG("[+] Recieved bytes %d\n", bytecount);
 
     if (send_transfer->type == 'g') {
-        if (buffer[0] == '\xff') {
+        if (big_int[0] == '\xff') {
             goto SER_FAIL;
         }
 
