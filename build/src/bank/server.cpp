@@ -69,7 +69,7 @@ int bank_create_server(int host_port,char* af_name)
 void *bank_socket_handler(void *lp)
 {
     char nonce[NONCE_SIZE];
-    int bytecount, buffer_len, *csock, i;
+    int bytecount, buffer_len, *csock, i, fd;
     struct transfer *trans;
     struct timeval tv;
     struct db_money curr_balance;
@@ -119,8 +119,16 @@ void *bank_socket_handler(void *lp)
         ERR("Error receiving data %d\n", errno);
         goto NET_FAIL;
     }
-
-    read_from_file((char *) key, KEY_SIZE, auth_file);
+    DEBUG("Recieved encrypted data; Length %d\n",bytecount);
+    
+    fd = open(auth_file,O_RDONLY);
+    if(!fd){
+        ERR("Failed to open auth file\n");
+    }
+    
+    if(read(fd,key,KEY_SIZE) < 32){
+        ERR("Failed to read correctly from auth file\n");
+    }
     
     if(!decrypt(c_txt, buffer_len, buffer, key, (unsigned char*) nonce)){
         ERR("Failed to decrypt user message\n");

@@ -39,7 +39,7 @@ int atm_connect(char *host_name, int host_port)
 
 int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
 {
-    int bytecount;
+    int bytecount, fd;
     struct transfer *atm_transfer;
     struct timeval tv;
     tv.tv_sec = 10;
@@ -77,14 +77,28 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
     memcpy(&(send_transfer->nonce), tmp_nonce, NONCE_SIZE);
     
     serialize(buffer, send_transfer);
-    
-    read_from_file((char*)key, KEY_SIZE, auth_file);    
+
     c_txt = (char *) malloc(sizeof(struct transfer));
+    
+    fd = open(auth_file,O_RDONLY);
+    if(!fd){
+        ERR("Failed to open auth file\n");
+	goto FAIL;
+    }
+    if(read(fd,key,KEY_SIZE) < 32){
+        ERR("Failed to read correctly from auth file\n");
+	goto FAIL;
+    }
+    
+    close(fd);
 
     if(!encrypt(buffer,buffer_len,c_txt,key,(unsigned char*) tmp_nonce)){
         ERR("Failed to encrypt serialized data\n");
 	goto FAIL;
     }
+    
+    LOG("[+] Serialized data encrypted\n");
+    LOG("[+] Buffer Length: %d\n",buffer_len);
 
     if ((bytecount = send(hsock, c_txt, buffer_len, 0)) == -1) {
         ERR("[-] Error sending data %d\n", errno);
