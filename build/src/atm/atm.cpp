@@ -175,7 +175,7 @@ int atm_main(int argc, char **argv)
         return 255;
     }
 
-    client_ret = atm_send(hsock, atm_transfer);
+    client_ret = atm_send(hsock, atm_transfer,auth_file);
     if (client_ret == 63 || client_ret == 255) {
         if (atm_transfer->type == 'n') {
             if (remove(card_file) != 0) {

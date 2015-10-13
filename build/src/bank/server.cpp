@@ -76,9 +76,11 @@ void *bank_socket_handler(void *lp)
     char buffer[sizeof(struct transfer)];
     std::string big_int;
 
-    unsigned char iv[IV_SIZE];
-    unsigned char* key = (unsigned char*) "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABB";
+    /* Need to gen key from first 32 bytes */
+    unsigned char* key;
     char* c_txt;
+
+    c_txt = (char*) malloc(sizeof(struct transfer));
 
     tv.tv_sec = 10;
     tv.tv_usec = 0;
@@ -108,8 +110,15 @@ void *bank_socket_handler(void *lp)
     }
 
     memset(buffer, 0, buffer_len);
-    if((bytecount = recv(*csock, buffer, buffer_len, 0)) == -1){
+    if((bytecount = recv(*csock, c_txt, buffer_len, 0)) == -1){
         ERR("Error receiving data %d\n", errno);
+        goto NET_FAIL;
+    }
+
+    /* TODO initialize iv, needs to be send by atm*/
+    
+    if(!decrypt(c_txt, buffer_len, buffer, key, (unsigned char*) nonce)){
+        ERR("Failed to decrypt user message\n");
         goto NET_FAIL;
     }
 
@@ -213,13 +222,7 @@ void *bank_socket_handler(void *lp)
     } else {
         serialize(buffer, trans);
 	
-	c_txt = (char*) malloc(sizeof(struct transfer));
-	
-	if(!encrypt(buffer, buffer_len, c_txt, key, iv)){
-	    ERR("Error encrypting buffer\n");
-	}
-	
-        if((bytecount = send(*csock, c_txt, buffer_len, 0)) == -1){
+        if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
             ERR("Error sending data %d\n", errno);
             goto NET_FAIL;
         }
