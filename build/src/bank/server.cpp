@@ -76,6 +76,10 @@ void *bank_socket_handler(void *lp)
     char buffer[sizeof(struct transfer)];
     std::string big_int;
 
+    unsigned char iv[IV_SIZE];
+    unsigned char* key = (unsigned char*) "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABB";
+    char* c_txt;
+
     tv.tv_sec = 10;
     tv.tv_usec = 0;
     csock = (int *) lp;
@@ -208,8 +212,14 @@ void *bank_socket_handler(void *lp)
         fflush(stdout);
     } else {
         serialize(buffer, trans);
-
-        if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
+	
+	c_txt = (char*) malloc(sizeof(struct transfer));
+	
+	if(!encrypt(buffer, buffer_len, c_txt, key, iv)){
+	    ERR("Error encrypting buffer\n");
+	}
+	
+        if((bytecount = send(*csock, c_txt, buffer_len, 0)) == -1){
             ERR("Error sending data %d\n", errno);
             goto NET_FAIL;
         }
