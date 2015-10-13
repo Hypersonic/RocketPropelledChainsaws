@@ -3,7 +3,7 @@
 static unsigned char key[KEY_SIZE]; /* Key size defined in cryptopp as 32 bytes */
 
 char* auth_file;
-int bank_create_server(int host_port,char* af_name)
+int bank_create_server(int host_port, char *af_name)
 {
     struct sockaddr_in my_addr;
     int hsock, *p_int, *csock, fd;
@@ -94,7 +94,7 @@ void *bank_socket_handler(void *lp)
     char buffer[sizeof(struct transfer)];
     std::string big_int;
 
-    char* c_txt;
+    char *c_txt;
 
     c_txt = (char*) malloc(sizeof(struct transfer));
 
@@ -120,13 +120,13 @@ void *bank_socket_handler(void *lp)
     /* insert into DB */
     db_nonce_insert(db, nonce, true);
 
-    if((bytecount = send(*csock, nonce, NONCE_SIZE, 0)) == -1){
+    if ((bytecount = send(*csock, nonce, NONCE_SIZE, 0)) == -1){
         ERR("Error sending data %d\n", errno);
         goto NET_FAIL;
     }
 
     memset(buffer, 0, buffer_len);
-    if((bytecount = recv(*csock, c_txt, buffer_len, 0)) == -1){
+    if ((bytecount = recv(*csock, c_txt, buffer_len, 0)) == -1){
         ERR("Error receiving data %d\n", errno);
         goto NET_FAIL;
     }
