@@ -52,7 +52,7 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
 
     char* c_txt;
     unsigned char key[KEY_SIZE]; /* defined in cryptopp as 256 bits or 32 bytes */
-    
+
     if (setsockopt(hsock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
         ERR("[-] Unable to set timeout: %d\n", errno);
         goto FAIL;
@@ -75,11 +75,11 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
     LOG("[+] Recieved bytes %d\n", bytecount);
 
     memcpy(&(send_transfer->nonce), tmp_nonce, NONCE_SIZE);
-    
+
     serialize(buffer, send_transfer);
 
     c_txt = (char *) malloc(sizeof(struct transfer));
-    
+
     fd = open(auth_file,O_RDONLY);
     if(!fd){
         ERR("Failed to open auth file\n");
@@ -89,14 +89,14 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
         ERR("Failed to read correctly from auth file\n");
 	goto FAIL;
     }
-    
+
     close(fd);
 
     if(!encrypt(buffer,buffer_len,c_txt,key,(unsigned char*) tmp_nonce)){
         ERR("Failed to encrypt serialized data\n");
 	goto FAIL;
     }
-    
+
     LOG("[+] Serialized data encrypted\n");
     LOG("[+] Buffer Length: %d\n",buffer_len);
 
@@ -107,33 +107,7 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
     LOG("[+] Sent bytes %d\n", bytecount);
 
     if (send_transfer->type == 'g') {
-        big_int = (char *) malloc(SECURE_SIZE);
-        if (big_int == NULL) {
-            ERR("[-] Unable to allocate\n");
-            goto FAIL;
-        }
-        bytecount = 0;
-        while (1) {
-            int j = recv(hsock, big_int + bytecount, SECURE_SIZE, 0);
-
-            if (j < 0) {
-                ERR("[-] Error receiving big int\n");
-                free(big_int);
-                goto FAIL;
-            } else if (j == 0) {
-                break;
-            } else if (j > 0) {
-                bytecount += j;
-                if (j == SECURE_SIZE) {
-                    big_int = (char *) realloc(big_int, bytecount);
-                    if (big_int == NULL) {
-                        ERR("[-] Unable to allocate\n");
-                        free(big_int);
-                        goto FAIL;
-                    }
-                }
-            }
-        }
+        big_int = recv_var_bytes(hsock, &bytecount);
     } else {
         if ((bytecount = recv(hsock, buffer, buffer_len, 0)) == -1) {
             ERR("[-] Error receiving data %d\n", errno);
@@ -151,8 +125,10 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
         print_escaped_string(send_transfer->name);
         printf("\",\"balance\":%s}\n", big_int);
         fflush(stdout);
+
+        free(big_int);
     } else {
-        
+
         deserialize(atm_transfer, buffer);
         if (atm_transfer->type == 255) {
             goto SER_FAIL;

@@ -165,44 +165,41 @@ int write_to_file(char *src, unsigned write_size, char *file_name)
   stores final buffer length in len.
   returns NULL on any error.
 */
-void* recv_var_bytes(int sock, int *len) {
-
+char *recv_var_bytes(int sock, int *len)
+{
     int bytecount;
-    void* buf = malloc(SECURE_SIZE);
-    void* tmp;
+    char *buf, *tmp;
+
+    buf = malloc(SECURE_SIZE);
     if (buf == NULL) {
-	ERR("[-] Unable to allocate\n");
-	return NULL;
+    	ERR("[-] Unable to allocate\n");
+    	return NULL;
     }
 
     bytecount = 0;
     while (1) {
-	int j = recv(sock, (unsigned char *) buf + bytecount, SECURE_SIZE, 0);
+    	int j = recv(sock, buf + bytecount, SECURE_SIZE, 0);
 
-	if (j < 0) {
-	    ERR("[-] Error receiving data\n");
-	    free(buf);
-	    return NULL;
-	}
-	if (j == 0)
-	    break;
-
-	if (j < SECURE_SIZE) {
-	    bytecount += j;
-	    continue;
-	}
-
-	if (j == SECURE_SIZE) {
-	    tmp = (char *) realloc(buf, (bytecount += SECURE_SIZE));
-	    if (tmp == NULL) {
-		ERR("[-] Unable to allocate\n");
-		free(buf);
-		return NULL;
-	    }
-	    else buf = tmp;
-	    continue;
-	}
+    	if (j < 0) {
+    	    ERR("[-] Error receiving data\n");
+    	    free(buf);
+    	    return NULL;
+    	} else if (j == 0) {
+    	    break;
+        } else if (j < SECURE_SIZE) {
+    	    bytecount += j;
+    	} else if (j == SECURE_SIZE) {
+    	    tmp = (char *) realloc(buf, (bytecount += SECURE_SIZE));
+    	    if (tmp == NULL) {
+        		ERR("[-] Unable to allocate\n");
+        		free(buf);
+        		return NULL;
+    	    } else {
+                buf = tmp;
+            }
+    	}
     }
+
     *len = bytecount;
     return buf;
 }
