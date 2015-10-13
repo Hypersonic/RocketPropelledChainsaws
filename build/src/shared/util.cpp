@@ -56,11 +56,16 @@ int random_bytes(char* buf, size_t len)
     if (rand_pool_pos + len >= RAND_POOL_SIZE) {
         LOG("Refilling random pool!\n");
         int random_data = open("/dev/urandom", O_RDONLY);
+        if (random_data < 0) {
+            ERR("Unable to open /dev/urandom: %s\n", strerror(errno));
+            return 0;
+        }
         size_t random_data_read = 0;
         while (random_data_read < len) {
             ssize_t result = read(random_data, rand_pool + random_data_read, RAND_POOL_SIZE - random_data_read);
             if (result < 0) {
-                ERR("Unable to generate random numbers: %d\n", errno);
+                ERR("Unable to generate random numbers: %s\n", strerror(errno));
+                close(random_data);
                 return 0;
             }
             random_data_read += result;
