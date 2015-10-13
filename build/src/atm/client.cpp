@@ -50,8 +50,13 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     char *big_int = NULL;
     int buffer_len = sizeof(struct transfer);
 
+    unsigned char* iv;
+    AES_RNG* rng_gen;
     char *c_txt;
 
+    iv = (unsigned char*) malloc(NONCE_SIZE);
+
+    
     if (setsockopt(hsock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
         ERR("[-] Unable to set timeout: %d\n", errno);
         goto FAIL;
@@ -74,6 +79,10 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     LOG("[+] Recieved bytes %d\n", bytecount);
 
     memcpy(&(send_transfer->nonce), tmp_nonce, NONCE_SIZE);
+    
+    /* initialize the rng */
+    rng_gen = init_iv_gen((unsigned char*)tmp_nonce);
+    get_next_iv(rng_gen,(char*)iv);
 
     serialize(buffer, send_transfer);
 
@@ -82,28 +91,23 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
         goto FAIL;
     }
 
-    if (!encrypt(buffer, buffer_len, c_txt, (unsigned char *) auth_file_contents,
-                (unsigned char*) tmp_nonce)) {
-        ERR("Failed to encrypt serialized data\n");
-    	goto FAIL;
-    }
-
-    LOG("[+] Serialized data encrypted\n");
     LOG("[+] Buffer Length: %d\n",buffer_len);
 
-    if ((bytecount = send(hsock, c_txt, buffer_len, 0)) == -1) {
+    if ((bytecount = secure_send(hsock, buffer, buffer_len, (unsigned char*)auth_file_contents, iv)) == -1) {
         ERR("[-] Error sending data %d\n", errno);
         goto FAIL;
     }
     LOG("[+] Sent bytes %d\n", bytecount);
-
+    
+    get_next_iv(rng_gen,(char*)iv);
+    
     if (send_transfer->type == 'g') {
-        if ((big_int = recv_var_bytes(hsock, &bytecount)) == NULL) {
+      if ((secure_var_recv(hsock, big_int, (unsigned char*)auth_file_contents, iv)) == -1) {
             ERR("[-] Error receiving data %d\n", errno);
             goto FAIL;
         }
     } else {
-        if ((bytecount = recv(hsock, buffer, buffer_len, 0)) == -1) {
+      if ((bytecount = secure_transfer_recv(hsock, buffer, buffer_len, (unsigned char*) auth_file_contents, iv)) == -1) {
             ERR("[-] Error receiving data %d\n", errno);
             goto FAIL;
         }

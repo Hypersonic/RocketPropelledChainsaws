@@ -22,7 +22,7 @@
 #include "bank/db.h"
 
 /* not actually unused but compiler on linux complains */
-UNUSED static db_t *db; /* global db */
+extern db_t *db; /* global db */
 
 void *bank_socket_handler(void *socket);
 

@@ -34,7 +34,7 @@ ssize_t secure_transfer_recv(int sockfd, void *buf, size_t len,
 
 AES_RNG* init_iv_gen(unsigned char *iv);
 
-int get_next_iv(AES_RNG *prng, unsigned char *iv);
+int get_next_iv(AES_RNG *prng, char *iv);
 
 void free_iv_gen(AES_RNG *prng);
 
