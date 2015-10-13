@@ -72,7 +72,7 @@ int bank_main(int argc, char **argv)
         fflush(stdout);
     }
 
-    if (!bank_create_server(host_port)) {
+    if (!bank_create_server(host_port, auth_file)) {
         return 255;
     }
     return 0;

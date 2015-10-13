@@ -1,11 +1,14 @@
 #include "server.h"
 
-int bank_create_server(int host_port)
+char* auth_file;
+int bank_create_server(int host_port,char* af_name)
 {
     struct sockaddr_in my_addr;
     int hsock, *p_int, *csock;
     sockaddr_in sadr;
-
+    
+    auth_file = af_name;
+    
     db = db_create(); /* initialize the global db */
 
     socklen_t addr_size = 0;
@@ -76,8 +79,7 @@ void *bank_socket_handler(void *lp)
     char buffer[sizeof(struct transfer)];
     std::string big_int;
 
-    /* Need to gen key from first 32 bytes */
-    unsigned char* key;
+    unsigned char key[KEY_SIZE]; /* Key size defined in cryptopp as 32 bytes */
     char* c_txt;
 
     c_txt = (char*) malloc(sizeof(struct transfer));
@@ -115,7 +117,7 @@ void *bank_socket_handler(void *lp)
         goto NET_FAIL;
     }
 
-    /* TODO initialize iv, needs to be send by atm*/
+    read_from_file((char *) key, KEY_SIZE, auth_file);
     
     if(!decrypt(c_txt, buffer_len, buffer, key, (unsigned char*) nonce)){
         ERR("Failed to decrypt user message\n");

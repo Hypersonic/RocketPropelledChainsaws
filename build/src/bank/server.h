@@ -26,7 +26,7 @@ UNUSED static db_t *db; /* global db */
 
 void *bank_socket_handler(void *socket);
 
-int bank_create_server(int host_port);
+int bank_create_server(int host_port, char* auth_file);
 
 void server_close(int *csock);
 
