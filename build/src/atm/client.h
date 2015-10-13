@@ -17,7 +17,7 @@
 #include "shared/config.h"
 
 int atm_connect(char *host_name, int host_port);
-int atm_send(int hsock, struct transfer *send_transfer, char *auth_file);
+int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents);
 void atm_close(int hsock);
 
 #endif

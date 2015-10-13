@@ -1,27 +1,16 @@
 #include "server.h"
 
-static unsigned char key[KEY_SIZE]; /* Key size defined in cryptopp as 32 bytes */
+static unsigned char *key;
 
-char* auth_file;
-int bank_create_server(int host_port, char *af_name)
+int bank_create_server(int host_port, unsigned char *auth_file_contents)
 {
     struct sockaddr_in my_addr;
-    int hsock, *p_int, *csock, fd;
+    int hsock, *p_int, *csock;
     sockaddr_in sadr;
-    
-    auth_file = af_name;
-    
+
     db = db_create(); /* initialize the global db */
-    
-    fd = open(auth_file,O_RDONLY);
-    if (!fd) {
-        ERR("Failed to open auth file\n");
-    }
-    
-    if (read(fd,key,KEY_SIZE) < 32) {
-        ERR("Failed to read correctly from auth file\n");
-    }
-    close(fd);
+
+    key = auth_file_contents;
 
     socklen_t addr_size = 0;
     pthread_t thread_id = 0;
@@ -132,9 +121,8 @@ void *bank_socket_handler(void *lp)
     }
     DEBUG("Recieved encrypted data; Length %d\n",bytecount);
     DEBUG("Buffer Length %d\n",buffer_len);
-    
+
     decrypt(c_txt, buffer_len, buffer, key, (unsigned char*) nonce);
-    
 
     if (NULL == (trans = (struct transfer *) malloc(sizeof(struct transfer)))) {
         ERR("Error allocating transfer struct\n");
@@ -247,7 +235,7 @@ void *bank_socket_handler(void *lp)
         fflush(stdout);
     } else {
         serialize(buffer, trans);
-	
+
         if((bytecount = send(*csock, buffer, buffer_len, 0)) == -1){
             ERR("Error sending data %d\n", errno);
             goto NET_FAIL;

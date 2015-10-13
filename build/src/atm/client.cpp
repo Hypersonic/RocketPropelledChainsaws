@@ -37,9 +37,9 @@ int atm_connect(char *host_name, int host_port)
     return hsock;
 }
 
-int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
+int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents)
 {
-    int bytecount, fd;
+    int bytecount;
     struct transfer *atm_transfer;
     struct timeval tv;
     tv.tv_sec = 10;
@@ -50,8 +50,7 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
     char *big_int = NULL;
     int buffer_len = sizeof(struct transfer);
 
-    char* c_txt;
-    unsigned char key[KEY_SIZE]; /* defined in cryptopp as 256 bits or 32 bytes */
+    char *c_txt;
 
     if (setsockopt(hsock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
         ERR("[-] Unable to set timeout: %d\n", errno);
@@ -78,23 +77,15 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
 
     serialize(buffer, send_transfer);
 
-    c_txt = (char *) malloc(sizeof(struct transfer));
-
-    fd = open(auth_file,O_RDONLY);
-    if(!fd){
-        ERR("Failed to open auth file\n");
-	goto FAIL;
-    }
-    if(read(fd,key,KEY_SIZE) < 32){
-        ERR("Failed to read correctly from auth file\n");
-	goto FAIL;
+    if ((c_txt = (char *) malloc(sizeof(struct transfer))) == NULL) {
+        ERR("[-] Error allocating\n");
+        goto FAIL;
     }
 
-    close(fd);
-
-    if(!encrypt(buffer,buffer_len,c_txt,key,(unsigned char*) tmp_nonce)){
+    if (!encrypt(buffer, buffer_len, c_txt, (unsigned char *) auth_file_contents,
+                (unsigned char*) tmp_nonce)) {
         ERR("Failed to encrypt serialized data\n");
-	goto FAIL;
+    	goto FAIL;
     }
 
     LOG("[+] Serialized data encrypted\n");
@@ -107,7 +98,10 @@ int atm_send(int hsock, struct transfer *send_transfer,char* auth_file)
     LOG("[+] Sent bytes %d\n", bytecount);
 
     if (send_transfer->type == 'g') {
-        big_int = recv_var_bytes(hsock, &bytecount);
+        if ((big_int = recv_var_bytes(hsock, &bytecount)) == NULL) {
+            ERR("[-] Error receiving data %d\n", errno);
+            goto FAIL;
+        }
     } else {
         if ((bytecount = recv(hsock, buffer, buffer_len, 0)) == -1) {
             ERR("[-] Error receiving data %d\n", errno);

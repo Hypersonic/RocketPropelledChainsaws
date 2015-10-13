@@ -58,21 +58,21 @@ int bank_main(int argc, char **argv)
         ERR("[-] Auth file already exists!\n");
         return 255;
     } else {
-        auth_file_contents = (char *) malloc(SECURE_SIZE);
+        auth_file_contents = (char *) malloc(KEY_SIZE);
         if (auth_file_contents == NULL) {
             ERR("[-] Unable to allocate\n");
             return 255;
         }
 
-        random_bytes(auth_file_contents, SECURE_SIZE);
-        if (!write_to_file(auth_file_contents, SECURE_SIZE, auth_file)) {
+        random_bytes(auth_file_contents, KEY_SIZE);
+        if (!write_to_file(auth_file_contents, KEY_SIZE, auth_file)) {
             return 255;
         }
         puts("created");
         fflush(stdout);
     }
 
-    if (!bank_create_server(host_port, auth_file)) {
+    if (!bank_create_server(host_port, (unsigned char *) auth_file_contents)) {
         return 255;
     }
     return 0;

@@ -140,13 +140,13 @@ int atm_main(int argc, char **argv)
         return 255;
     }
 
-    auth_file_contents = (char *) malloc(SECURE_SIZE);
+    auth_file_contents = (char *) malloc(KEY_SIZE);
     if (auth_file_contents == NULL) {
         ERR("[-] Unable to allocate\n");
         return 255;
     }
 
-    if (!read_from_file(auth_file_contents, SECURE_SIZE, auth_file)) {
+    if (!read_from_file(auth_file_contents, KEY_SIZE, auth_file)) {
         return 255;
     }
 
@@ -179,7 +179,7 @@ int atm_main(int argc, char **argv)
         return 255;
     }
 
-    client_ret = atm_send(hsock, atm_transfer,auth_file);
+    client_ret = atm_send(hsock, atm_transfer, auth_file_contents);
     if (client_ret == 63 || client_ret == 255) {
         if (atm_transfer->type == 'n') {
             if (remove(card_file) != 0) {
