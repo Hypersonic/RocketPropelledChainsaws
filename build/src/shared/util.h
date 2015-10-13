@@ -22,7 +22,7 @@ int is_valid_name(char *name);
 int is_valid_filename(char *filename);
 
 void print_escaped_string(char *str);
-int random_bytes(char* buf, size_t len);
+int random_bytes(char *buf, size_t len);
 
 unsigned get_file_size(const char * file_name);
 int read_from_file(char *dst, unsigned read_size, char *file_name);

@@ -23,6 +23,7 @@ db_t *db_create()
 
     db->balances = new std::map<std::string, struct db_money>();
     db->nonces = new std::map<std::string, bool>();
+    db->cards = new std::map<std::string, std::string>();
 
     return db;
 }
@@ -41,6 +42,7 @@ bool db_destroy(db_t *db)
 
     delete db->balances;
     delete db->nonces;
+    delete db->cards;
 
     free(db);
 
@@ -120,11 +122,11 @@ struct db_money db_get(db_t *db, std::string key)
     return (*db->balances)[key];
 }
 
-/* Nonce ops */
-bool db_nonce_insert(db_t *db, std::string key, bool value)
+bool db_nonce_insert(db_t *db, char *keyp, bool value)
 {
     assert(db != NULL);
 
+    std::string key(keyp, NONCE_SIZE);
 
     if (0 != pthread_mutex_lock(&db->nonce_lock)) {
         LOG("Could not lock nonce db\n");
@@ -137,7 +139,7 @@ bool db_nonce_insert(db_t *db, std::string key, bool value)
         return false;
     }
 
-    DEBUG("Inserting into nonce DB: %s\n", key.c_str());
+    DEBUG("Inserting into nonce DB\n");
     (*db->nonces)[key] = value; /* insert the element */
 
     if (0 != pthread_mutex_unlock(&db->nonce_lock)) {
@@ -148,23 +150,29 @@ bool db_nonce_insert(db_t *db, std::string key, bool value)
     return true;
 }
 
-bool db_nonce_contains(db_t *db, std::string key)
+bool db_nonce_contains(db_t *db, char *keyp)
 {
     assert(db != NULL);
+
+    std::string key(keyp, NONCE_SIZE);
 
     return db->nonces->end() != db->nonces->find(key);
 }
 
-bool db_nonce_get(db_t *db, std::string key)
+bool db_nonce_get(db_t *db, char *keyp)
 {
     assert(db != NULL);
+
+    std::string key(keyp, NONCE_SIZE);
 
     return (*db->nonces)[key];
 
 }
-bool db_nonce_remove(db_t *db, std::string key)
+bool db_nonce_remove(db_t *db, char *keyp)
 {
     assert(db != NULL);
+
+    std::string key(keyp, NONCE_SIZE);
 
     auto loc = db->nonces->find(key);
     if (db->nonces->end() == loc) {
@@ -175,26 +183,27 @@ bool db_nonce_remove(db_t *db, std::string key)
     return true;
 }
 
-/* nonce ops overloaded to take usigned char* */
-bool db_nonce_insert(db_t *db, unsigned char *keyp, bool value)
+/* CARD DB */
+bool db_card_insert(db_t *db, char *namep, char *cardp)
 {
     assert(db != NULL);
 
-    std::string key((char *) keyp, NONCE_SIZE);
+    std::string name(namep);
+    std::string card(cardp, CARD_SIZE);
 
     if (0 != pthread_mutex_lock(&db->nonce_lock)) {
         LOG("Could not lock nonce db\n");
         return false;
     }
 
-    /* if the db contains the key, we return an error */
-    if (db->nonces->end() != db->nonces->find(key)) {
-        LOG("nonces DB contained key %s already, cannot insert\n", key.c_str());
+    /* if the db contains the card, we return an error */
+    if (db->cards->end() != db->cards->find(name)) {
+        LOG("cards DB contained card for %s already, cannot insert\n", name.c_str());
         return false;
     }
 
-    DEBUG("Inserting into nonce DB: %s\n", key.c_str());
-    (*db->nonces)[key] = value; /* insert the element */
+    DEBUG("Inserting into card DB\n");
+    (*db->cards)[name] = card; /* insert the element */
 
     if (0 != pthread_mutex_unlock(&db->nonce_lock)) {
         LOG("Could not unlock nonce db\n");
@@ -204,35 +213,20 @@ bool db_nonce_insert(db_t *db, unsigned char *keyp, bool value)
     return true;
 }
 
-bool db_nonce_contains(db_t *db, unsigned char *keyp)
+bool db_card_contains(db_t *db, char *namep)
 {
     assert(db != NULL);
 
-    std::string key((char*) keyp, NONCE_SIZE);
+    std::string name(namep);
 
-    return db->nonces->end() != db->nonces->find(key);
+    return db->cards->end() != db->cards->find(name);
 }
 
-bool db_nonce_get(db_t *db, unsigned char *keyp)
+std::string db_card_get(db_t *db, char *namep)
 {
     assert(db != NULL);
 
-    std::string key((char*) keyp, NONCE_SIZE);
+    std::string name(namep);
 
-    return (*db->nonces)[key];
-
-}
-bool db_nonce_remove(db_t *db, unsigned char *keyp)
-{
-    assert(db != NULL);
-
-    std::string key((char*) keyp, NONCE_SIZE);
-
-    auto loc = db->nonces->find(key);
-    if (db->nonces->end() == loc) {
-        LOG("Could not find nonce in DB: %s\n", key.c_str());
-        return false;
-    }
-    db->nonces->erase(loc);
-    return true;
+    return (*db->cards)[name];
 }

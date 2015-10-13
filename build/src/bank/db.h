@@ -13,8 +13,9 @@
 typedef struct db_s {
     pthread_mutex_t balance_lock;
     std::map<std::string, struct db_money> *balances;
-    pthread_mutex_t nonce_lock;
+    std::map<std::string, std::string> *cards;
     std::map<std::string, bool> *nonces;
+    pthread_mutex_t nonce_lock;
 } db_t;
 
 /* Create a new DB.
@@ -60,11 +61,11 @@ struct db_money db_get(db_t *db, std::string key);
  *
  * Returns whether the operation was a success
  * */
-bool db_nonce_insert(db_t *db, std::string key, bool value);
+bool db_nonce_insert(db_t *db, char* keyp, bool value);
 
 /* Return whether a db contains a given key
  */
-bool db_nonce_contains(db_t *db, std::string key);
+bool db_nonce_contains(db_t *db, char* keyp);
 
 /* Retrieve a name associated with a key from the nonce db.
  *
@@ -73,20 +74,17 @@ bool db_nonce_contains(db_t *db, std::string key);
  *
  * Returns the user associated with the key.
  */
-bool db_nonce_get(db_t *db, std::string key);
+bool db_nonce_get(db_t *db, char* keyp);
 
 /* Remove a key from the DB.
  * returns whether the op was a success
  */
-bool db_nonce_remove(db_t *db, std::string key);
+bool db_nonce_remove(db_t *db, char* keyp);
 
-/* nonce ops overloaded to take usigned char* */
-bool db_nonce_insert(db_t *db, unsigned char* keyp, bool value);
+bool db_card_insert(db_t *db, char *namep, char *cardp);
 
-bool db_nonce_contains(db_t *db, unsigned char* keyp);
+bool db_card_contains(db_t *db, char *namep);
 
-bool db_nonce_get(db_t *db, unsigned char* keyp);
-
-bool db_nonce_remove(db_t *db, unsigned char* keyp);
+std::string db_card_get(db_t *db, char *namep);
 
 #endif
