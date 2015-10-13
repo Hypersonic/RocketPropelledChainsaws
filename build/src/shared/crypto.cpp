@@ -66,11 +66,12 @@ ssize_t secure_send(int sockfd, const void* buf, size_t len,
 }
 
 
-ssize_t secure_recv(int sockfd, void *buf, unsigned char *key,
+ssize_t secure_var_recv(int sockfd, void *buf, unsigned char *key,
     unsigned char *iv)
 {
     int len, enc_len, status;
-    char *enc = (char *) recv_var_bytes(sockfd, &enc_len);
+    char *enc;
+    enc = (char *) recv_var_bytes(sockfd, &enc_len);
     if (enc == NULL) {
     /* if there is an error recv_var_bytes will report it for us */
         return -1;
@@ -82,6 +83,20 @@ ssize_t secure_recv(int sockfd, void *buf, unsigned char *key,
         return -1;
     }
     status = decrypt((char *) buf, enc_len, rec, key, iv);
+    return status ? len : -1;
+}
+
+ssize_t secure_transfer_recv(int sockfd, void *buf, size_t len,
+			     unsigned char *key, unsigned char *iv)
+{
+    int enc_len, status;
+    enc_len = len + TAG_SIZE;
+    char enc[enc_len];
+    if ((status = recv(sockfd, enc, enc_len, 0)) == -1) {
+	ERR("[-] Error receiving data %d\n", errno);
+	return -1;
+    }
+    status = decrypt(enc, enc_len, (char *) buf, key, iv);
     return status ? len : -1;
 }
 

@@ -17,22 +17,25 @@
 #define KEY_SIZE CryptoPP::AES::MAX_KEYLENGTH /* 32 bytes = 256 bits */
 #define IV_SIZE 12 /* 96 bits as recommended by AES GCM spec */
 
-int encrypt(char* plain, int plen, char* cipher, unsigned char* key, 
+int encrypt(char *plain, int plen, char *cipher, unsigned char *key, 
 	    unsigned char* iv);
 
-int decrypt(char* cipher, int clen, char* plain, unsigned char* key, 
-	    unsigned char* iv);
+int decrypt(char *cipher, int clen, char *plain, unsigned char *key, 
+	    unsigned char *iv);
 
-ssize_t secure_send(int sockfd, const void* buf, size_t len,
-		    unsigned char* key, unsigned char* iv);
+ssize_t secure_send(int sockfd, const void *buf, size_t len,
+		    unsigned char *key, unsigned char *iv);
 
-ssize_t secure_recv(int sockfd, void* buf, unsigned char* key,
-		    unsigned char* iv);
+ssize_t secure_var_recv(int sockfd, void *buf, unsigned char *key,
+			unsigned char *iv);
 
-AES_RNG* init_iv_gen(unsigned char* iv);
+ssize_t secure_transfer_recv(int sockfd, void *buf, size_t len,
+			     unsigned char *key, unsigned char *iv);
 
-int get_next_iv(AES_RNG* prng, unsigned char* iv);
+AES_RNG* init_iv_gen(unsigned char *iv);
 
-void free_iv_gen(AES_RNG* prng);
+int get_next_iv(AES_RNG *prng, unsigned char *iv);
+
+void free_iv_gen(AES_RNG *prng);
 
 #endif
