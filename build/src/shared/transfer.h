@@ -27,10 +27,6 @@ int serialize(char *dst, struct transfer *src);
  */
 int deserialize(struct transfer *dst, char *src);
 
-UNUSED int encrypt(char *key, char *enc, char *plain);
-
-UNUSED int dencrypt(char *key, char *plain, char *enc);
-
 /* Encrypt then Mac 
  * Returns a mac given a secret key and cipher-text
  */

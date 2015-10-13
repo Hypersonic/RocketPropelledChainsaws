@@ -52,17 +52,6 @@ int deserialize(struct transfer *dst, char *src)
     return 1;
 }
 
-UNUSED int encrypt(UNUSED char *key, UNUSED char *enc, UNUSED char *plain)
-{
-    return 0;
-}
-
-
-UNUSED int dencrypt(UNUSED char *key, char UNUSED *plain, UNUSED char *enc)
-{
-    return 0;
-}
-
 int print_transfer(char type, struct transfer *t)
 {
     const char *type_message[4] = {"initial_balance", "deposit",
