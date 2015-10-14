@@ -34,7 +34,7 @@ ifdef DEBUG
 	FLAGS += -g -DDEBUG_MODE
 	MODE   = debug
 else
-	FLAGS += -O2
+	FLAGS += -O3
 endif
 
 
