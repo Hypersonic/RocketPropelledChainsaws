@@ -1,5 +1,6 @@
 #include "server.h"
 
+
 static unsigned char *key;
 db_t* db;
 
