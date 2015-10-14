@@ -249,10 +249,6 @@ void *bank_socket_handler(void *lp)
             goto NET_FAIL;
         }
 
-        printf("{\"account\":\"");
-        print_escaped_string(trans->name);
-        printf("\",\"balance\":%s}\n", tmp);
-        fflush(stdout);
     } else {
         serialize(buffer, trans);
 
@@ -275,23 +271,41 @@ void *bank_socket_handler(void *lp)
     return NULL;
 
 SER_FAIL:
-    trans->type = 255;
-    serialize(buffer, trans);
+    if (trans->type == 'g') {
+        big_int = std::string("\xffLOLMONEYMONEYLOL");
+        const char *tmp = big_int.c_str();
+        memset(iv, 0, NONCE_SIZE);
 
-    memset(iv, 0, NONCE_SIZE);
+        if(!get_next_iv(rng_gen, (char *) iv)){
+            ERR("Failed to generate a new iv\n");
+            goto NET_FAIL;
+        }
 
-    if (!get_next_iv(rng_gen, (char *) iv)){
-        ERR("Failed to generate a new iv\n");
-        goto NET_FAIL;
-    }
+        if((bytecount = secure_send(*csock, tmp, strlen(tmp), key, iv)) == -1) {
+            ERR("Error sending data %d\n", errno);
+            goto NET_FAIL;
+        }
+    } else {
+        trans->type = 255;
+        serialize(buffer, trans);
 
-    if((bytecount = secure_send(*csock, buffer, buffer_len, key, iv)) == -1){
-        ERR("Error sending data %d\n", errno);
+        memset(iv, 0, NONCE_SIZE);
+
+        if (!get_next_iv(rng_gen, (char *) iv)){
+            ERR("Failed to generate a new iv\n");
+            goto NET_FAIL;
+        }
+
+        if((bytecount = secure_send(*csock, buffer, buffer_len, key, iv)) == -1){
+            ERR("Error sending data %d\n", errno);
+            goto NET_FAIL;
+        }
     }
 
     free(trans);
     server_close(csock);
     return NULL;
+
 NET_FAIL:
     db_nonce_remove(db, nonce);
     puts("protocol_error");
