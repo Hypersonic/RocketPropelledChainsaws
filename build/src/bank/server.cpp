@@ -85,12 +85,10 @@ void *bank_socket_handler(void *lp)
     char buffer[sizeof(struct transfer)];
     std::string big_int;
 
-    char *c_txt;
     unsigned char *iv;
 
     /* iv will hold new ivs as the come */
     iv = (unsigned char*) malloc(NONCE_SIZE);
-    c_txt = (char*) malloc(sizeof(struct transfer));
 
     tv.tv_sec = 10;
     tv.tv_usec = 0;
