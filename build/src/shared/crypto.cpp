@@ -79,7 +79,7 @@ ssize_t secure_var_recv(int sockfd, char **buf, unsigned char *key,
     }
     len = enc_len - TAG_SIZE;
     *buf = (char *) malloc(len);
-    if(buf == NULL) {
+    if (buf == NULL) {
         ERR("[-] Unable to allocate\n");
         return -1;
     }
@@ -88,14 +88,14 @@ ssize_t secure_var_recv(int sockfd, char **buf, unsigned char *key,
 }
 
 ssize_t secure_transfer_recv(int sockfd, void *buf, size_t len,
-			     unsigned char *key, unsigned char *iv)
+                 unsigned char *key, unsigned char *iv)
 {
     int enc_len, status;
     enc_len = len + TAG_SIZE;
     char enc[enc_len];
     if ((status = recv(sockfd, enc, enc_len, 0)) == -1) {
-	ERR("[-] Error receiving data %d\n", errno);
-	return -1;
+        ERR("[-] Error receiving data %d\n", errno);
+        return -1;
     }
     status = decrypt(enc, enc_len, (char *) buf, key, iv);
     return status ? len : -1;
@@ -111,8 +111,8 @@ int get_next_iv(AES_RNG *prng, char *iv)
   prng->GenerateBlock((unsigned char*) iv, NONCE_SIZE);
     #if defined BANK
     if(!db_nonce_insert(db, (char *) iv, true)) {
-    	ERR("[-] PRNG Generated nonce exists. What are the chances?\n");
-    	return 0;
+        ERR("[-] PRNG Generated nonce exists. What are the chances?\n");
+        return 0;
     }
     #endif
     return 1;

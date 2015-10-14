@@ -191,7 +191,7 @@ int atm_main(int argc, char **argv)
                 return 255;
             }
         }
-	LOG("%d\n", client_ret);
+    	LOG("%d\n", client_ret);
         return client_ret;
     }
 

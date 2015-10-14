@@ -103,9 +103,9 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     get_next_iv(rng_gen,(char*)iv);
 
     if (send_transfer->type == 'g') {
-	if ((bytecount = secure_var_recv(hsock, &big_int, (unsigned char *) auth_file_contents, iv)) == -1) {
-            ERR("[-] Error receiving data %d\n", errno);
-            goto FAIL;
+        if ((bytecount = secure_var_recv(hsock, &big_int, (unsigned char *) auth_file_contents, iv)) == -1) {
+                ERR("[-] Error receiving data %d\n", errno);
+                goto FAIL;
         }
     } else {
       if ((bytecount = secure_transfer_recv(hsock, buffer, buffer_len, (unsigned char *) auth_file_contents, iv)) == -1) {
@@ -119,6 +119,8 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
         if (big_int[0] == '\xff') {
             goto SER_FAIL;
         }
+
+        *(strchr(big_int, '.') + 3) = '\0';
 
         printf("{\"account\":\"");
         print_escaped_string(send_transfer->name);

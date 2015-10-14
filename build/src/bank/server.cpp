@@ -110,11 +110,11 @@ void *bank_socket_handler(void *lp)
     } while (db_nonce_contains(db, nonce));
 
     /* seed our iv generator */
-    rng_gen = init_iv_gen((unsigned char*) nonce);
+    rng_gen = init_iv_gen((unsigned char *) nonce);
 
-    if(!get_next_iv(rng_gen, (char*)iv)){
+    if (!get_next_iv(rng_gen, (char *) iv)){
         ERR("Failed to get next iv\n");
-	goto NET_FAIL;
+        goto NET_FAIL;
     }
 
     /* insert into DB */
@@ -224,8 +224,11 @@ void *bank_socket_handler(void *lp)
         curr_balance = db_get(db, trans->name);
         tmp_cents = std::to_string(curr_balance.cents);
         tmp_big = curr_balance.dollars;
-        big_int = bigUnsignedToString(tmp_big);
-        big_int += "." + (tmp_cents.length() == 1 ? std::string("0") : std::string("")) + tmp_cents;
+        big_int = bigUnsignedToString(tmp_big) + ".";
+        if (tmp_cents.length() == 1) {
+            big_int += "0";
+        }
+        big_int += tmp_cents;
         break;
     default:  /* Error */
         ERR("Error deserializing transfer struct, unknown option %c\n", trans->type);
@@ -234,14 +237,14 @@ void *bank_socket_handler(void *lp)
 
     if (trans->type == 'g') {
         const char *tmp = big_int.c_str();
-	memset(iv,0,NONCE_SIZE);
+        memset(iv, 0, NONCE_SIZE);
 
-	if(!get_next_iv(rng_gen, (char*) iv)){
-	    ERR("Failed to generate a new iv\n");
-	    goto NET_FAIL;
-	}
+        if(!get_next_iv(rng_gen, (char *) iv)){
+            ERR("Failed to generate a new iv\n");
+            goto NET_FAIL;
+        }
 
-        if((bytecount = secure_send(*csock, tmp, big_int.length(), key, iv)) == -1){
+        if((bytecount = secure_send(*csock, tmp, strlen(tmp), key, iv)) == -1) {
             ERR("Error sending data %d\n", errno);
             goto NET_FAIL;
         }
@@ -253,16 +256,16 @@ void *bank_socket_handler(void *lp)
     } else {
         serialize(buffer, trans);
 
-	memset(iv,0,NONCE_SIZE);
+        memset(iv, 0, NONCE_SIZE);
 
-	if(!get_next_iv(rng_gen, (char*) iv)){
-	    ERR("Failed to generate a new iv\n");
-	    goto NET_FAIL;
-	}
+        if (!get_next_iv(rng_gen, (char *) iv)){
+            ERR("Failed to generate a new iv\n");
+            goto NET_FAIL;
+        }
 
-        if((bytecount = secure_send(*csock, buffer, buffer_len, key, (unsigned char*)iv)) == -1){
+        if((bytecount = secure_send(*csock, buffer, buffer_len, key, (unsigned char *) iv)) == -1){
             ERR("Error sending data %d\n", errno);
-	    goto NET_FAIL;
+            goto NET_FAIL;
         }
     }
 
@@ -275,17 +278,16 @@ SER_FAIL:
     trans->type = 255;
     serialize(buffer, trans);
 
-    memset(iv,0,NONCE_SIZE);
+    memset(iv, 0, NONCE_SIZE);
 
-    if(!get_next_iv(rng_gen, (char*) iv)){
-	ERR("Failed to generate a new iv\n");
-	goto NET_FAIL;
+    if (!get_next_iv(rng_gen, (char *) iv)){
+        ERR("Failed to generate a new iv\n");
+        goto NET_FAIL;
     }
 
     if((bytecount = secure_send(*csock, buffer, buffer_len, key, iv)) == -1){
         ERR("Error sending data %d\n", errno);
     }
-
 
     free(trans);
     server_close(csock);

@@ -172,32 +172,33 @@ char *recv_var_bytes(int sock, int *len)
 
     buf = (char *) malloc(RECV_SIZE);
     if (buf == NULL) {
-    	ERR("[-] Unable to allocate\n");
-    	return NULL;
+        ERR("[-] Unable to allocate\n");
+        return NULL;
     }
 
     bytecount = 0;
     while (1) {
-    	int j = recv(sock, buf + bytecount, RECV_SIZE, 0);
+        int j = recv(sock, buf + bytecount, RECV_SIZE, 0);
 
-    	if (j < 0) {
-    	    ERR("[-] Error receiving data\n");
-    	    free(buf);
-    	    return NULL;
-    	} else if (j == 0) {
-    	    break;
+        if (j < 0) {
+            ERR("[-] Error receiving data\n");
+            free(buf);
+            return NULL;
+        } else if (j == 0) {
+            break;
         } else if (j < RECV_SIZE) {
-    	    bytecount += j;
-    	} else if (j == RECV_SIZE) {
-    	    tmp = (char *) realloc(buf, (bytecount += RECV_SIZE));
-    	    if (tmp == NULL) {
-		ERR("[-] Unable to allocate\n");
-		free(buf);
-		return NULL;
-    	    } else {
-                buf = tmp;
+            bytecount += j;
+            break;
+        } else if (j == RECV_SIZE) {
+            tmp = (char *) realloc(buf, bytecount + RECV_SIZE);
+            if (tmp == NULL) {
+                ERR("[-] Unable to allocate\n");
+                free(buf);
+                return NULL;
             }
-    	}
+            buf = tmp;
+            bytecount += RECV_SIZE;
+        }
     }
 
     *len = bytecount;
