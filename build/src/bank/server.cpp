@@ -33,7 +33,7 @@ int bank_create_server(int host_port, unsigned char *auth_file_contents)
 
     free(p_int);
 
-    my_addr.sin_family = AF_INET ;
+    my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(host_port);
 
     memset(&(my_addr.sin_zero), 0, 8);
