@@ -70,7 +70,7 @@ int bank_create_server(int host_port, unsigned char *auth_file_contents)
 void *bank_socket_handler(void *lp)
 {
     char nonce[NONCE_SIZE];
-    int bytecount, buffer_len, *csock, i;
+    int bytecount, buffer_len, *csock, i, to_send_len;
     struct transfer *trans;
     struct timeval tv;
     struct db_money curr_balance;
@@ -82,6 +82,7 @@ void *bank_socket_handler(void *lp)
     const char *db_card, *trans_card;
 
     char buffer[sizeof(struct transfer)];
+    char *to_send = NULL;
     std::string big_int;
 
     unsigned char *iv;
@@ -183,7 +184,9 @@ void *bank_socket_handler(void *lp)
         db_insert(db, trans->name, tmp_money);
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
-        break;
+
+        goto SERIALIZE_TRANSFER;
+
     case 'd': /* deposit */
         if (!db_contains(db, trans->name)) {
             ERR("No such user: \"%s\"\n", trans->name);
@@ -197,7 +200,9 @@ void *bank_socket_handler(void *lp)
         }
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
-        break;
+
+        goto SERIALIZE_TRANSFER;
+
     case 'w': /* withdraw */
         if (!db_contains(db, trans->name)) {
             ERR("No such user: \"%s\"\n", trans->name);
@@ -214,7 +219,13 @@ void *bank_socket_handler(void *lp)
         }
         print_transfer(trans->type, trans);
         trans->type = 0; /* return code 0 */
+
+    SERIALIZE_TRANSFER:
+        serialize(buffer, trans);
+        to_send = (char *) &buffer;
+        to_send_len = buffer_len;
         break;
+
     case 'g': /* get balance */
         if (!db_contains(db, trans->name)) {
             ERR("No such user: \"%s\"\n", trans->name);
@@ -228,44 +239,31 @@ void *bank_socket_handler(void *lp)
             big_int += "0";
         }
         big_int += tmp_cents;
+
+        to_send = (char *) big_int.c_str();
+        to_send_len = strlen(to_send);
+
+        fputs("{\"account\":\"", stdout);
+        print_escaped_string(trans->name);
+        fputs("\",\"balance\":", stdout);
+        fputs(to_send, stdout);
+        fputs("}\n", stdout);
+        fflush(stdout);
         break;
     default:  /* Error */
         ERR("Error deserializing transfer struct, unknown option %c\n", trans->type);
         goto SER_FAIL;
     }
 
-    if (trans->type == 'g') {
-        const char *tmp = big_int.c_str();
-        memset(iv, 0, NONCE_SIZE);
+    memset(iv, 0, NONCE_SIZE);
+    if (!get_next_iv(rng_gen, (char *) iv)) {
+        ERR("Failed to generate a new iv\n");
+        goto NET_FAIL;
+    }
 
-        if(!get_next_iv(rng_gen, (char *) iv)){
-            ERR("Failed to generate a new iv\n");
-            goto NET_FAIL;
-        }
-
-        if((bytecount = secure_send(*csock, tmp, strlen(tmp), key, iv)) == -1) {
-            ERR("Error sending data %d\n", errno);
-            goto NET_FAIL;
-        }
-
-        printf("{\"account\":\"");
-        print_escaped_string(trans->name);
-        printf("\",\"balance\":%s}\n", tmp);
-        fflush(stdout);
-    } else {
-        serialize(buffer, trans);
-
-        memset(iv, 0, NONCE_SIZE);
-
-        if (!get_next_iv(rng_gen, (char *) iv)){
-            ERR("Failed to generate a new iv\n");
-            goto NET_FAIL;
-        }
-
-        if((bytecount = secure_send(*csock, buffer, buffer_len, key, (unsigned char *) iv)) == -1){
-            ERR("Error sending data %d\n", errno);
-            goto NET_FAIL;
-        }
+    if ((bytecount = secure_send(*csock, to_send, to_send_len, key, (unsigned char *) iv)) == -1){
+        ERR("Error sending data %d\n", errno);
+        goto NET_FAIL;
     }
 
     DEBUG("Sent bytes %d\n", bytecount);
@@ -284,7 +282,7 @@ SER_FAIL:
             goto NET_FAIL;
         }
 
-        if((bytecount = secure_send(*csock, tmp, strlen(tmp), key, iv)) == -1) {
+        if ((bytecount = secure_send(*csock, tmp, strlen(tmp), key, iv)) == -1) {
             ERR("Error sending data %d\n", errno);
             goto NET_FAIL;
         }

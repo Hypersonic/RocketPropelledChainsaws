@@ -47,7 +47,6 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
 
     char buffer[sizeof(struct transfer)];
     char tmp_nonce[NONCE_SIZE];
-    char *big_int = NULL;
     int buffer_len = sizeof(struct transfer);
 
     unsigned char* iv;
@@ -100,34 +99,28 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     LOG("[+] Sent bytes %d\n", bytecount);
 
     memset(iv, 0, NONCE_SIZE);
-    get_next_iv(rng_gen,(char*)iv);
+    get_next_iv(rng_gen, (char *) iv);
 
-    if (send_transfer->type == 'g') {
-        if ((bytecount = secure_var_recv(hsock, &big_int, (unsigned char *) auth_file_contents, iv)) == -1) {
-                ERR("[-] Error receiving data %d\n", errno);
-                goto FAIL;
-        }
-    } else {
-      if ((bytecount = secure_transfer_recv(hsock, buffer, buffer_len, (unsigned char *) auth_file_contents, iv)) == -1) {
-            ERR("[-] Error receiving data %d\n", errno);
-            goto FAIL;
-        }
+    if ((bytecount = secure_transfer_recv(hsock, buffer, buffer_len, (unsigned char *) auth_file_contents, iv)) == -1) {
+        ERR("[-] Error decrypting data\n");
+        goto FAIL;
     }
+
     LOG("[+] Recieved bytes %d\n", bytecount);
 
     if (send_transfer->type == 'g') {
-        if (big_int[0] == '\xff') {
+        if (buffer[0] == '\xff') {
             goto SER_FAIL;
         }
 
-        *(strchr(big_int, '.') + 3) = '\0';
+        *(strchr(buffer, '.') + 3) = '\0';
 
-        printf("{\"account\":\"");
+        fputs("{\"account\":\"", stdout);
         print_escaped_string(send_transfer->name);
-        printf("\",\"balance\":%s}\n", big_int);
+        fputs("\",\"balance\":", stdout);
+        fputs(buffer, stdout);
+        fputs("}\n", stdout);
         fflush(stdout);
-
-        free(big_int);
     } else {
 
         deserialize(atm_transfer, buffer);

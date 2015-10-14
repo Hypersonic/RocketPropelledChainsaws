@@ -90,13 +90,14 @@ ssize_t secure_var_recv(int sockfd, char **buf, unsigned char *key,
 ssize_t secure_transfer_recv(int sockfd, void *buf, size_t len,
                  unsigned char *key, unsigned char *iv)
 {
-    int enc_len, status;
+    int enc_len, status, bytesrecv;
     enc_len = len + TAG_SIZE;
     char enc[enc_len];
-    if ((status = recv(sockfd, enc, enc_len, 0)) == -1) {
-        ERR("[-] Error receiving data %d\n", errno);
+    if ((bytesrecv = recv(sockfd, enc, enc_len, 0)) == -1) {
+        ERR("[-] Error receiving data, read: %d\n", bytesrecv);
         return -1;
     }
+    enc_len = bytesrecv;
     status = decrypt(enc, enc_len, (char *) buf, key, iv);
     return status ? len : -1;
 }
