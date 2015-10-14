@@ -284,9 +284,10 @@ SER_FAIL:
 	goto NET_FAIL;
     }
 
-    if((bytecount = secure_send(*csock, c_txt, buffer_len, key, iv)) == -1){
+    if((bytecount = secure_send(*csock, buffer, buffer_len, key, iv)) == -1){
         ERR("Error sending data %d\n", errno);
     }
+    
 
     free(trans);
     server_close(csock);
