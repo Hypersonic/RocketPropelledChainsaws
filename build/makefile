@@ -5,7 +5,7 @@ DEVEXT  = -dev
 
 .PHONY: all clean
 
-FLAGS  := -O3 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11 -Isrc/
+FLAGS  := -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11 -Isrc/
 BANK_FLAGS := -DBANK
 ATM_FLAGS := -DATM
 CFLAGS = 
@@ -33,6 +33,8 @@ ifdef DEBUG
 	BANK_BNRY  := $(BANK_BNRY)$(DEVEXT)
 	FLAGS += -g -DDEBUG_MODE
 	MODE   = debug
+else
+	FLAGS += -O3
 endif
 
 
