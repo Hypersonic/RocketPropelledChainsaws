@@ -93,7 +93,7 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
 
     LOG("[+] Buffer Length: %d\n",buffer_len);
 
-    if ((bytecount = secure_send(hsock, buffer, buffer_len, (unsigned char*)auth_file_contents, iv)) == -1) {
+    if ((bytecount = secure_send(hsock, buffer, buffer_len, (unsigned char *) auth_file_contents, iv)) == -1) {
         ERR("[-] Error sending data %d\n", errno);
         goto FAIL;
     }
@@ -102,12 +102,12 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     get_next_iv(rng_gen,(char*)iv);
     
     if (send_transfer->type == 'g') {
-      if ((secure_var_recv(hsock, big_int, (unsigned char*)auth_file_contents, iv)) == -1) {
+	if ((bytecount = secure_var_recv(hsock, &big_int, (unsigned char *) auth_file_contents, iv)) == -1) {
             ERR("[-] Error receiving data %d\n", errno);
             goto FAIL;
         }
     } else {
-      if ((bytecount = secure_transfer_recv(hsock, buffer, buffer_len, (unsigned char*) auth_file_contents, iv)) == -1) {
+      if ((bytecount = secure_transfer_recv(hsock, buffer, buffer_len, (unsigned char *) auth_file_contents, iv)) == -1) {
             ERR("[-] Error receiving data %d\n", errno);
             goto FAIL;
         }

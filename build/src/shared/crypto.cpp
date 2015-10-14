@@ -34,6 +34,7 @@ int encrypt(char *plain, int plen, char *cipher, unsigned char *key,
 int decrypt(char* cipher, int clen, char* plain, unsigned char* key,
     unsigned char* iv)
 {
+    assert(cipher != NULL);
     try {
         GCM<AES>::Decryption d;
         d.SetKeyWithIV(key, KEY_SIZE, iv, IV_SIZE);
@@ -66,7 +67,7 @@ ssize_t secure_send(int sockfd, const void* buf, size_t len,
 }
 
 
-ssize_t secure_var_recv(int sockfd, void *buf, unsigned char *key,
+ssize_t secure_var_recv(int sockfd, char **buf, unsigned char *key,
     unsigned char *iv)
 {
     int len, enc_len, status;
@@ -77,12 +78,12 @@ ssize_t secure_var_recv(int sockfd, void *buf, unsigned char *key,
         return -1;
     }
     len = enc_len - TAG_SIZE;
-    char *rec = (char *) malloc(len);
-    if(rec == NULL) {
+    *buf = (char *) malloc(len);
+    if(buf == NULL) {
         ERR("[-] Unable to allocate\n");
         return -1;
     }
-    status = decrypt((char *) buf, enc_len, rec, key, iv);
+    status = decrypt((char *) enc, enc_len, (char *) *buf, key, iv);
     return status ? len : -1;
 }
 

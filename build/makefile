@@ -41,7 +41,7 @@ endif
 all: $(BANK_BNRY) $(ATM_BNRY)
 
 clean:
-	$(RM) $(BUILD) $(BANK_BNRY) $(ATM_BNRY) $(BANK_BNRY)$(DEVEXT) $(ATM_BNRY)$(DEVEXT)
+	$(RM) $(BUILD) $(BANK_BNRY) $(ATM_BNRY) $(BANK_BNRY)$(DEVEXT) $(ATM_BNRY)$(DEVEXT) *.card *.auth
 
 
 $(DIRS):

@@ -26,7 +26,7 @@ int decrypt(char *cipher, int clen, char *plain, unsigned char *key,
 ssize_t secure_send(int sockfd, const void *buf, size_t len,
 		    unsigned char *key, unsigned char *iv);
 
-ssize_t secure_var_recv(int sockfd, void *buf, unsigned char *key,
+ssize_t secure_var_recv(int sockfd, char **buf, unsigned char *key,
 			unsigned char *iv);
 
 ssize_t secure_transfer_recv(int sockfd, void *buf, size_t len,

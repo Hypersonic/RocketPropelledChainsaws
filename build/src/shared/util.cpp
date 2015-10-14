@@ -191,9 +191,9 @@ char *recv_var_bytes(int sock, int *len)
     	} else if (j == RECV_SIZE) {
     	    tmp = (char *) realloc(buf, (bytecount += RECV_SIZE));
     	    if (tmp == NULL) {
-        		ERR("[-] Unable to allocate\n");
-        		free(buf);
-        		return NULL;
+		ERR("[-] Unable to allocate\n");
+		free(buf);
+		return NULL;
     	    } else {
                 buf = tmp;
             }
