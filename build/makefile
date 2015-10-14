@@ -5,10 +5,10 @@ DEVEXT  = -dev
 
 .PHONY: all clean
 
-FLAGS  := -O2 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11 -Isrc/
+FLAGS  := -O3 -Werror -Wall -Wextra -Wfloat-equal -Wshadow -Wcast-align -Wunreachable-code -Wunused-variable -std=c++11 -Isrc/
 BANK_FLAGS := -DBANK
 ATM_FLAGS := -DATM
-CFLAGS = -O3
+CFLAGS = 
 ifeq ($(MACHINE), Linux)
 	LIBS = -pthread -lssl -lcryptopp
 else
