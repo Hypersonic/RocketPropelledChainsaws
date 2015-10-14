@@ -249,6 +249,10 @@ void *bank_socket_handler(void *lp)
             goto NET_FAIL;
         }
 
+        printf("{\"account\":\"");
+        print_escaped_string(trans->name);
+        printf("\",\"balance\":%s}\n", tmp);
+        fflush(stdout);
     } else {
         serialize(buffer, trans);
 
@@ -298,10 +302,9 @@ SER_FAIL:
 
         if((bytecount = secure_send(*csock, buffer, buffer_len, key, iv)) == -1){
             ERR("Error sending data %d\n", errno);
-            goto NET_FAIL;
         }
-    }
 
+    }
     free(trans);
     server_close(csock);
     return NULL;
