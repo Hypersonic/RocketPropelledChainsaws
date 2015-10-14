@@ -98,7 +98,8 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
         goto FAIL;
     }
     LOG("[+] Sent bytes %d\n", bytecount);
-    
+
+    memset(iv,0,NONCE_SIZE);
     get_next_iv(rng_gen,(char*)iv);
     
     if (send_transfer->type == 'g') {
