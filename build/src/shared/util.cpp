@@ -108,7 +108,7 @@ int read_from_file(char *dst, unsigned read_size, char *file_name)
     }
 
     f = fopen(file_name, "r");
-    if (! f) {
+    if (!f) {
         ERR("[-] Could not open '%s': %s.\n", file_name,
                  strerror(errno));
         return 0;
