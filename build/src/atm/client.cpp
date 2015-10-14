@@ -128,6 +128,7 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     } else {
 
         deserialize(atm_transfer, buffer);
+	LOG("Transfer type recieved: %d\n",atm_transfer->type);
         if (atm_transfer->type == 255) {
             goto SER_FAIL;
         }
