@@ -35,6 +35,10 @@ int atm_main(int argc, char **argv)
             break;
         case 'i':
             host_name = optarg;
+            if ('0' == host_name[0]) {
+                ERR("[-] Invalid hostname given\n");
+                return 255;
+            }
             break;
         case 'p':
             host_port = (int) strtol(optarg, &end, 10);

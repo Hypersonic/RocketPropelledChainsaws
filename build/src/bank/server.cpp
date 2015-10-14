@@ -108,15 +108,15 @@ void *bank_socket_handler(void *lp)
     do {
         random_bytes(nonce, NONCE_SIZE);
     } while (db_nonce_contains(db, nonce));
-    
+
     /* seed our iv generator */
     rng_gen = init_iv_gen((unsigned char*) nonce);
-    
+
     if(!get_next_iv(rng_gen, (char*)iv)){
         ERR("Failed to get next iv\n");
 	goto NET_FAIL;
     }
-    
+
     /* insert into DB */
     db_nonce_insert(db, nonce, true);
 
@@ -124,16 +124,16 @@ void *bank_socket_handler(void *lp)
         ERR("Error sending data %d\n", errno);
         goto NET_FAIL;
     }
-    
+
     memset(buffer, 0, buffer_len);
     if ((bytecount = secure_transfer_recv(*csock, buffer, buffer_len, key, iv)) == -1){
         ERR("Error receiving data %d\n", errno);
         goto NET_FAIL;
     }
-    
+
     DEBUG("Recieved encrypted data; Length %d\n",bytecount);
     DEBUG("Buffer Length %d\n",buffer_len);
-    
+
     if (NULL == (trans = (struct transfer *) malloc(sizeof(struct transfer)))) {
         ERR("Error allocating transfer struct\n");
         goto SER_FAIL;
@@ -235,7 +235,7 @@ void *bank_socket_handler(void *lp)
     if (trans->type == 'g') {
         const char *tmp = big_int.c_str();
 	memset(iv,0,NONCE_SIZE);
-	
+
 	if(!get_next_iv(rng_gen, (char*) iv)){
 	    ERR("Failed to generate a new iv\n");
 	    goto NET_FAIL;
@@ -252,14 +252,14 @@ void *bank_socket_handler(void *lp)
         fflush(stdout);
     } else {
         serialize(buffer, trans);
-	
+
 	memset(iv,0,NONCE_SIZE);
-	
+
 	if(!get_next_iv(rng_gen, (char*) iv)){
 	    ERR("Failed to generate a new iv\n");
 	    goto NET_FAIL;
 	}
-	
+
         if((bytecount = secure_send(*csock, buffer, buffer_len, key, (unsigned char*)iv)) == -1){
             ERR("Error sending data %d\n", errno);
 	    goto NET_FAIL;
@@ -274,9 +274,9 @@ void *bank_socket_handler(void *lp)
 SER_FAIL:
     trans->type = 255;
     serialize(buffer, trans);
-    
+
     memset(iv,0,NONCE_SIZE);
-	
+
     if(!get_next_iv(rng_gen, (char*) iv)){
 	ERR("Failed to generate a new iv\n");
 	goto NET_FAIL;
@@ -285,7 +285,7 @@ SER_FAIL:
     if((bytecount = secure_send(*csock, buffer, buffer_len, key, iv)) == -1){
         ERR("Error sending data %d\n", errno);
     }
-    
+
 
     free(trans);
     server_close(csock);

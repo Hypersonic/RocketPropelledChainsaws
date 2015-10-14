@@ -56,7 +56,7 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
 
     iv = (unsigned char*) malloc(NONCE_SIZE);
 
-    
+
     if (setsockopt(hsock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof tv)) {
         ERR("[-] Unable to set timeout: %d\n", errno);
         goto FAIL;
@@ -79,7 +79,7 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     LOG("[+] Recieved bytes %d\n", bytecount);
 
     memcpy(&(send_transfer->nonce), tmp_nonce, NONCE_SIZE);
-    
+
     /* initialize the rng */
     rng_gen = init_iv_gen((unsigned char*)tmp_nonce);
     get_next_iv(rng_gen,(char*)iv);
@@ -99,9 +99,9 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     }
     LOG("[+] Sent bytes %d\n", bytecount);
 
-    memset(iv,0,NONCE_SIZE);
+    memset(iv, 0, NONCE_SIZE);
     get_next_iv(rng_gen,(char*)iv);
-    
+
     if (send_transfer->type == 'g') {
 	if ((bytecount = secure_var_recv(hsock, &big_int, (unsigned char *) auth_file_contents, iv)) == -1) {
             ERR("[-] Error receiving data %d\n", errno);
@@ -129,7 +129,8 @@ int atm_send(int hsock, struct transfer *send_transfer, char *auth_file_contents
     } else {
 
         deserialize(atm_transfer, buffer);
-	LOG("Transfer type recieved: %d\n",atm_transfer->type);
+        LOG("Transfer type recieved: %d\n", atm_transfer->type);
+
         if (atm_transfer->type == 255) {
             goto SER_FAIL;
         }
