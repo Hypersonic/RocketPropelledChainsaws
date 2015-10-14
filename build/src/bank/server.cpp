@@ -240,7 +240,7 @@ void *bank_socket_handler(void *lp)
 	
 	if(!get_next_iv(rng_gen, (char*) iv)){
 	    ERR("Failed to generate a new iv\n");
-	    goto SER_FAIL;
+	    goto NET_FAIL;
 	}
 
         if((bytecount = secure_send(*csock, tmp, big_int.length(), key, iv)) == -1){
@@ -259,7 +259,7 @@ void *bank_socket_handler(void *lp)
 	
 	if(!get_next_iv(rng_gen, (char*) iv)){
 	    ERR("Failed to generate a new iv\n");
-	    goto SER_FAIL;
+	    goto NET_FAIL;
 	}
 	
         if((bytecount = secure_send(*csock, buffer, buffer_len, key, (unsigned char*)iv)) == -1){
@@ -276,9 +276,18 @@ void *bank_socket_handler(void *lp)
 SER_FAIL:
     trans->type = 255;
     serialize(buffer, trans);
-    if((bytecount = send(*csock, c_txt, buffer_len, 0)) == -1){
+    
+    memset(iv,0,NONCE_SIZE);
+	
+    if(!get_next_iv(rng_gen, (char*) iv)){
+	ERR("Failed to generate a new iv\n");
+	goto NET_FAIL;
+    }
+
+    if((bytecount = secure_send(*csock, c_txt, buffer_len, key, iv)) == -1){
         ERR("Error sending data %d\n", errno);
     }
+
     free(trans);
     server_close(csock);
     return NULL;
