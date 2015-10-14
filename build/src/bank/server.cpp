@@ -14,7 +14,6 @@ int bank_create_server(int host_port, unsigned char *auth_file_contents)
     key = auth_file_contents;
 
     socklen_t addr_size = 0;
-    pthread_t thread_id = 0;
 
     if ((hsock = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         ERR("[-] Error initializing socket %d\n", errno);
@@ -57,8 +56,7 @@ int bank_create_server(int host_port, unsigned char *auth_file_contents)
         csock = (int *) malloc(sizeof(int));
         if ((*csock = accept(hsock, (sockaddr *)&sadr, &addr_size)) != -1) {
             DEBUG("[+] Received connection from %s\n", inet_ntoa(sadr.sin_addr));
-            pthread_create(&thread_id, 0, &bank_socket_handler, (void *)csock);
-            pthread_detach(thread_id);
+            bank_socket_handler(csock);
         } else {
             ERR("[-] Error accepting %d\n", errno);
             puts("protocol_error");
